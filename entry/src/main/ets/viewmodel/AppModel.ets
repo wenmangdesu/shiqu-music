@@ -132,6 +132,30 @@ export class AppModel {
       const pl = new AppPlayerListener(this);
       this.player.setListener(pl);
       await this.player.init(ctx);
+      // 4.5 续播恢复：还原上次队列与播放进度（不自动播放）
+      try {
+        const pathsRaw: string[] = PrefsService.getInstance().getStrArr(C.P_LAST_QUEUE);
+        if (pathsRaw.length > 0) {
+          const byPath: Map<string, Song> = new Map();
+          this.localSongs.forEach((s: Song) => {
+            byPath.set(s.filePath, s);
+          });
+          const restored: Song[] = [];
+          pathsRaw.forEach((p: string) => {
+            const s: Song | undefined = byPath.get(p);
+            if (s) {
+              restored.push(s);
+            }
+          });
+          if (restored.length > 0) {
+            const idx: number = Math.max(0, PrefsService.getInstance().getNum(C.P_LAST_INDEX, 0));
+            const pos: number = Math.max(0, PrefsService.getInstance().getNum(C.P_LAST_POS, 0));
+            this.player.restoreQueue(restored, Math.min(idx, restored.length - 1), pos);
+          }
+        }
+      } catch (err) {
+        // 恢复失败不影响启动
+      }
       // 5. 下载服务（恢复未完成任务）
       const dl = new AppDlListener(this);
       DownloadService.getInstance().setListener(dl);
@@ -471,22 +495,40 @@ export class AppModel {
     });
   }
 
-  /** 操作菜单：返回选中项索引，取消返回-1 */
+  /** 操作菜单：返回选中项索引，取消返回-1（支持1-6个按钮） */
   actionMenu(title: string, items: string[]): Promise<number> {
     return new Promise<number>((resolve: (v: number) => void) => {
-      // buttons为元组类型(最多6项)，需显式构造
+      // buttons为元组类型(最多6项)，需按数量显式构造
       const color: ResourceColor = $r('app.color.cm_text');
-      const b0: promptAction.Button = { text: items[0] ?? '', color: color };
-      const b1: promptAction.Button = { text: items[1] ?? '', color: color };
-      const b2: promptAction.Button = { text: items[2] ?? '', color: color };
-      const b3: promptAction.Button = { text: items[3] ?? '', color: color };
-      promptAction.showActionMenu({ title: title, buttons: [b0, b1, b2, b3] })
-        .then((r: promptAction.ActionMenuSuccessResponse) => {
-          resolve(r.index);
-        })
-        .catch(() => {
-          resolve(-1);
-        });
+      const mk = (i: number): promptAction.Button => {
+        const b: promptAction.Button = { text: items[i] ?? '', color: color };
+        return b;
+      };
+      const onDone = (r: promptAction.ActionMenuSuccessResponse): void => {
+        resolve(r.index);
+      };
+      const onFail = (): void => {
+        resolve(-1);
+      };
+      if (items.length >= 6) {
+        promptAction.showActionMenu({ title: title, buttons: [mk(0), mk(1), mk(2), mk(3), mk(4), mk(5)] })
+          .then(onDone).catch(onFail);
+      } else if (items.length === 5) {
+        promptAction.showActionMenu({ title: title, buttons: [mk(0), mk(1), mk(2), mk(3), mk(4)] })
+          .then(onDone).catch(onFail);
+      } else if (items.length === 4) {
+        promptAction.showActionMenu({ title: title, buttons: [mk(0), mk(1), mk(2), mk(3)] })
+          .then(onDone).catch(onFail);
+      } else if (items.length === 3) {
+        promptAction.showActionMenu({ title: title, buttons: [mk(0), mk(1), mk(2)] })
+          .then(onDone).catch(onFail);
+      } else if (items.length === 2) {
+        promptAction.showActionMenu({ title: title, buttons: [mk(0), mk(1)] })
+          .then(onDone).catch(onFail);
+      } else {
+        promptAction.showActionMenu({ title: title, buttons: [mk(0)] })
+          .then(onDone).catch(onFail);
+      }
     });
   }
 

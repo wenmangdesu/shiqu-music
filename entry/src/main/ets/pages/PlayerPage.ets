@@ -111,13 +111,6 @@ export struct PlayerPage {
     return this.song.id !== 0 || this.song.title !== '';
   }
 
-  private coverSrc(): string {
-    if (this.song.coverPath) {
-      return `file://${this.song.coverPath}`;
-    }
-    return this.song.coverUrl;
-  }
-
   private prepareDownload(): void {
     // 复制当前歌曲信息到对话框数据载体
     this.dlgSong.id = this.song.id;
@@ -144,7 +137,7 @@ export struct PlayerPage {
   private async topMenu(): Promise<void> {
     const floatOn: boolean = AppStorage.get<boolean>(C.K_FLOAT) ?? false;
     const idx: number = await this.model.actionMenu('更多操作',
-      ['音效均衡器', '播放队列', '倍速调节', '系统音量', floatOn ? '关闭桌面歌词' : '开启桌面歌词']);
+      ['音效均衡器', '播放队列', '倍速调节', '系统音量', '定时关闭', floatOn ? '关闭桌面歌词' : '开启桌面歌词']);
     if (idx === 0) {
       this.openSheet('eq');
     } else if (idx === 1) {
@@ -154,6 +147,20 @@ export struct PlayerPage {
     } else if (idx === 3) {
       this.openSheet('volume');
     } else if (idx === 4) {
+      const choice: number = await this.model.actionMenu('定时关闭',
+        ['取消定时', '15分钟后', '30分钟后', '60分钟后', '播完这首就停']);
+      if (choice === 0) {
+        this.player.setSleepTimer(0);
+      } else if (choice === 1) {
+        this.player.setSleepTimer(15);
+      } else if (choice === 2) {
+        this.player.setSleepTimer(30);
+      } else if (choice === 3) {
+        this.player.setSleepTimer(60);
+      } else if (choice === 4) {
+        this.player.setSleepTimer(-1);
+      }
+    } else if (idx === 5) {
       const next: boolean = !floatOn;
       AppStorage.setOrCreate(C.K_FLOAT, next);
       PrefsService.getInstance().putBool(C.P_FLOAT, next);

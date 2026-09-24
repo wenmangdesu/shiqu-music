@@ -14,6 +14,7 @@ import { audio } from '@kit.AudioKit';
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
 import { wantAgent, common } from '@kit.AbilityKit';
 import { notificationManager } from '@kit.NotificationKit';
+import { promptAction } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { Song } from '../model/Song';
 import { C, IPlayerHooks, IPlayerListener } from '../common/Constants';
@@ -74,6 +75,14 @@ export class PlayerService {
   private bgStarted: boolean = false;
   private lastNotifySongId: number = 0;
   private lastNotifyPlaying: boolean = false;
+  /** 续播恢复：待跳转的进度（prepared后执行），-1表示无 */
+  private pendingSeek: number = -1;
+  /** 续播记忆：上次持久化时间 */
+  private lastPosSave: number = 0;
+  /** 定时关闭：到达时间戳，0表示未启用 */
+  private sleepAt: number = 0;
+  /** 定时关闭：播完当前歌曲后停止 */
+  private sleepAfterSong: boolean = false;
 
   async init(ctx: common.UIAbilityContext): Promise<void> {
     this.ctx = ctx;
@@ -102,6 +111,76 @@ export class PlayerService {
       return this.queue[this.index];
     }
     return null;
+  }
+
+  // ==================== 续播记忆 ====================
+  /** 持久化当前队列/索引/进度（仅保留本地歌曲，在线歌曲重启后无法恢复） */
+  private persistQueue(): void {
+    if (this.queue.length === 0 || this.index < 0) {
+      return;
+    }
+    try {
+      const paths: string[] = [];
+      this.queue.forEach((s: Song) => {
+        paths.push(s.filePath);
+      });
+      PrefsService.getInstance().putStr(C.P_LAST_QUEUE, JSON.stringify(paths));
+      PrefsService.getInstance().putNum(C.P_LAST_INDEX, this.index);
+      const p: media.AVPlayer | undefined = this.avPlayer;
+      PrefsService.getInstance().putNum(C.P_LAST_POS, p ? p.currentTime : 0);
+    } catch (err) {
+      // 持久化失败可忽略
+    }
+  }
+
+  /** 启动时恢复上次队列与进度（不自动播放，等待用户点播放） */
+  restoreQueue(songs: Song[], index: number, posMs: number): void {
+    if (songs.length === 0 || !this.avPlayer) {
+      return;
+    }
+    this.queue = songs;
+    this.index = Math.max(0, Math.min(index, songs.length - 1));
+    const song: Song = this.queue[this.index];
+    this.autoPlay = false;
+    this.pendingSeek = Math.max(0, posMs);
+    AppStorage.setOrCreate(C.K_SONG, song);
+    AppStorage.setOrCreate(C.K_LIKED, song.isLiked);
+    AppStorage.setOrCreate(C.K_POS, this.pendingSeek);
+    AppStorage.setOrCreate(C.K_DUR, song.duration);
+    AvSessionHelper.getInstance().setMeta(song);
+    this.loadSong(song);
+  }
+
+  // ==================== 定时关闭 ====================
+  /**
+   * 定时关闭
+   * @param minutes 分钟数；0=取消定时；-1=播完当前歌曲后停止
+   */
+  setSleepTimer(minutes: number): void {
+    if (minutes === 0) {
+      this.sleepAt = 0;
+      this.sleepAfterSong = false;
+      promptAction.showToast({ message: '已取消定时关闭', duration: 2000 });
+      return;
+    }
+    if (minutes < 0) {
+      this.sleepAfterSong = true;
+      this.sleepAt = 0;
+      promptAction.showToast({ message: '播完当前歌曲后将停止播放', duration: 2000 });
+      return;
+    }
+    this.sleepAt = Date.now() + minutes * 60 * 1000;
+    this.sleepAfterSong = false;
+    promptAction.showToast({ message: `将在 ${minutes} 分钟后停止播放`, duration: 2000 });
+  }
+
+  /** 播放中检查定时关闭是否到时 */
+  private checkSleep(): void {
+    if (this.sleepAt > 0 && Date.now() >= this.sleepAt) {
+      this.sleepAt = 0;
+      this.pause();
+      promptAction.showToast({ message: '定时关闭：已暂停播放', duration: 2000 });
+    }
   }
 
   // ==================== 队列与播放 ====================
@@ -193,6 +272,10 @@ export class PlayerService {
     AppStorage.setOrCreate(C.K_SONG, new Song());
     AppStorage.setOrCreate(C.K_LIKED, false);
     notificationManager.cancel(C.NOTIFY_ID).catch(() => {});
+    // 清除续播记忆
+    PrefsService.getInstance().putStr(C.P_LAST_QUEUE, '');
+    PrefsService.getInstance().putNum(C.P_LAST_INDEX, -1);
+    PrefsService.getInstance().putNum(C.P_LAST_POS, 0);
     this.notifyQueueChange();
   }
 
@@ -225,6 +308,7 @@ export class PlayerService {
     this.loadSong(song);
     this.startBgTask();
     this.listener?.onSongChange(song);
+    this.persistQueue();
   }
 
   /** 加载播放源：本地走fd，网络走url */
@@ -385,6 +469,13 @@ export class PlayerService {
 
   /** 播放完成回调：按播放模式决定下一曲 */
   private onComplete(): void {
+    // 定时关闭：播完这首就停
+    if (this.sleepAfterSong) {
+      this.sleepAfterSong = false;
+      this.pause();
+      promptAction.showToast({ message: '定时关闭：已停止播放', duration: 2000 });
+      return;
+    }
     const mode: number = AppStorage.get<number>(C.K_MODE) ?? C.PLAY_MODE_LIST;
     if (mode === C.PLAY_MODE_SINGLE) {
       this.seek(0);
@@ -414,6 +505,13 @@ export class PlayerService {
         AppStorage.setOrCreate(C.K_DUR, p.duration);
         this.onDurationReady(p.duration);
         this.applySpeed();
+        // 续播恢复：跳到上次进度（不自动播放）
+        if (this.pendingSeek >= 0) {
+          Promise.resolve(p.seek(this.pendingSeek, media.SeekMode.SEEK_PREV_SYNC)).catch(() => {});
+          AppStorage.setOrCreate(C.K_POS, this.pendingSeek);
+          AvSessionHelper.getInstance().setState(false, this.pendingSeek);
+          this.pendingSeek = -1;
+        }
         if (this.autoPlay) {
           p.play().catch(() => {});
         }
@@ -429,12 +527,18 @@ export class PlayerService {
       }
     });
     p.on('timeUpdate', () => {
+      this.checkSleep();
       const now: number = Date.now();
       if (now - this.lastEmit < 250) {
         return;
       }
       this.lastEmit = now;
       AppStorage.setOrCreate(C.K_POS, p.currentTime);
+      // 续播记忆：每5秒保存一次进度
+      if (now - this.lastPosSave > 5000) {
+        this.lastPosSave = now;
+        this.persistQueue();
+      }
     });
     p.on('durationUpdate', () => {
       AppStorage.setOrCreate(C.K_DUR, p.duration);
@@ -470,6 +574,10 @@ export class PlayerService {
     AppStorage.setOrCreate(C.K_PLAYING, playing);
     const p: media.AVPlayer | undefined = this.avPlayer;
     AvSessionHelper.getInstance().setState(playing, p ? p.currentTime : 0);
+    // 暂停时立即保存续播进度
+    if (!playing) {
+      this.persistQueue();
+    }
     // 更新通知栏（按歌曲+状态去重，避免频繁刷新）
     const s: Song | null = this.currentSong();
     if (s && (s.id !== this.lastNotifySongId || playing !== this.lastNotifyPlaying)) {
@@ -482,6 +590,7 @@ export class PlayerService {
   private notifyQueueChange(): void {
     const v: number = (AppStorage.get<number>(C.K_QUEUEV) ?? 0) + 1;
     AppStorage.setOrCreate(C.K_QUEUEV, v);
+    this.persistQueue();
     this.listener?.onQueueChange();
   }
 

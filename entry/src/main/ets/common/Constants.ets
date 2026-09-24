@@ -172,4 +172,7 @@ export class C {
   static readonly P_FLOAT: string = 'pref_float_lyrics';         // 桌面歌词
   static readonly P_SEARCH_HISTORY: string = 'pref_search_history'; // 搜索历史(JSON数组)
   static readonly P_CONCURRENCY: string = 'pref_dl_concurrency'; // 并发下载数
+  static readonly P_LAST_QUEUE: string = 'pref_last_queue';   // 续播记忆：上次队列(filePath数组)
+  static readonly P_LAST_INDEX: string = 'pref_last_index';   // 续播记忆：上次播放索引
+  static readonly P_LAST_POS: string = 'pref_last_pos';       // 续播记忆：上次播放进度(ms)
 }
