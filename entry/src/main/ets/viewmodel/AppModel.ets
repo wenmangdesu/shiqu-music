@@ -7,6 +7,7 @@
  *  - 播放联动：历史记录、播放次数、主题色跟随封面、通知授权
  */
 import { common, ConfigurationConstant, bundleManager } from '@kit.AbilityKit';
+import { pasteboard } from '@kit.BasicServicesKit';
 import { notificationManager } from '@kit.NotificationKit';
 import { promptAction } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
@@ -19,6 +20,7 @@ import { DbService } from '../service/DbService';
 import { PrefsService } from '../service/PrefsService';
 import { LibraryService } from '../service/LibraryService';
 import { DownloadService, IDlListener } from '../service/DownloadService';
+import { UserService } from '../service/UserService';
 import { ColorUtil } from '../utils/ColorUtil';
 import { Logger } from '../utils/Logger';
 
@@ -89,6 +91,9 @@ export class AppModel {
   editPlaylistId: number = -1;
   /** 选歌加入的目标歌单id */
   pickTargetPlaylistId: number = -1;
+  /** 歌手/专辑浏览页参数 */
+  groupType: string = 'artist';
+  groupName: string = '';
 
   private lastRecordSongId: number = 0;
   private lastRecordTime: number = 0;
@@ -169,6 +174,9 @@ export class AppModel {
       }).catch(() => {});
       // 7. 通知授权（首次弹窗）
       notificationManager.requestEnableNotification(ctx).catch(() => {});
+      // 7.5 恢复登录态（Mock用户服务）
+      UserService.getInstance().load();
+      this.bump(C.K_USERV);
       // 8. 版本名
       try {
         const info = bundleManager.getBundleInfoForSelfSync(bundleManager.BundleFlag.GET_BUNDLE_INFO_DEFAULT);
@@ -299,6 +307,18 @@ export class AppModel {
       return;
     }
     p.coverPath = path;
+    p.updateTime = Date.now();
+    await DbService.getInstance().updatePlaylist(p);
+    await this.reloadPlaylists();
+  }
+
+  /** 歌单内歌曲重新排序（上移/下移后持久化） */
+  async reorderPlaylist(id: number, songIds: number[]): Promise<void> {
+    const p: Playlist | null = this.getPlaylistById(id);
+    if (!p) {
+      return;
+    }
+    p.songIds = songIds;
     p.updateTime = Date.now();
     await DbService.getInstance().updatePlaylist(p);
     await this.reloadPlaylists();
@@ -566,5 +586,27 @@ export class AppModel {
   pushPickSongs(targetPlaylistId: number): void {
     this.pickTargetPlaylistId = targetPlaylistId;
     this.pushPage('PickSongs');
+  }
+
+  /** 打开歌手/专辑详情页 */
+  pushMusicGroup(type: string, name: string): void {
+    this.groupType = type;
+    this.groupName = name;
+    this.pushPage('MusicGroup');
+  }
+
+  /** 分享歌曲（第一阶段：复制分享文案到剪贴板；后续可接系统分享面板） */
+  shareSong(song: Song): void {
+    const text: string = `正在用「${C.APP_NAME}」听《${song.title}》 ${song.artist || '未知歌手'}`;
+    try {
+      const data: pasteboard.PasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, text);
+      pasteboard.getSystemPasteboard().setPasteData(data).then(() => {
+        this.toast('分享文案已复制到剪贴板');
+      }).catch(() => {
+        this.toast('分享失败');
+      });
+    } catch (err) {
+      this.toast('分享失败');
+    }
   }
 }

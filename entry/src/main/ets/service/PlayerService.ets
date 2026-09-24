@@ -75,6 +75,8 @@ export class PlayerService {
   private bgStarted: boolean = false;
   private lastNotifySongId: number = 0;
   private lastNotifyPlaying: boolean = false;
+  /** 当前占用中的文件fd（fdSrc要求fd保持打开，切歌时需关闭旧fd避免泄漏） */
+  private lastFd: number = -1;
   /** 续播恢复：待跳转的进度（prepared后执行），-1表示无 */
   private pendingSeek: number = -1;
   /** 续播记忆：上次持久化时间 */
@@ -100,6 +102,31 @@ export class PlayerService {
     // 注册锁屏/控制中心媒体会话
     const hooks = new PlayerHooksImpl(this);
     await AvSessionHelper.getInstance().init(ctx, hooks);
+    // 耳机/蓝牙音频设备断开时自动暂停
+    try {
+      audio.getAudioManager().on('deviceChange', (action: audio.DeviceChangeAction) => {
+        if (action.type !== audio.DeviceChangeType.DISCONNECT) {
+          return;
+        }
+        const playing: boolean = AppStorage.get<boolean>(C.K_PLAYING) ?? false;
+        if (!playing) {
+          return;
+        }
+        const list: audio.AudioDeviceDescriptors = action.deviceDescriptors;
+        for (let i = 0; i < list.length; i++) {
+          const dt: audio.AudioDeviceType = list[i].deviceType;
+          if (dt === audio.AudioDeviceType.WIRED_HEADSET ||
+            dt === audio.AudioDeviceType.WIRED_HEADPHONES ||
+            dt === audio.AudioDeviceType.BLUETOOTH_A2DP) {
+            this.pause();
+            promptAction.showToast({ message: '耳机已断开，已暂停播放', duration: 2000 });
+            break;
+          }
+        }
+      });
+    } catch (err) {
+      // 设备监听注册失败可忽略
+    }
   }
 
   setListener(l: IPlayerListener): void {
@@ -322,8 +349,18 @@ export class PlayerService {
         if (song.filePath.startsWith('http')) {
           p.url = song.filePath;
         } else {
+          // 关闭上一首占用的fd，避免长时间使用导致句柄泄漏
+          if (this.lastFd >= 0) {
+            try {
+              fs.closeSync(this.lastFd);
+            } catch (e) {
+              // 旧fd可能已失效
+            }
+            this.lastFd = -1;
+          }
           const st: fs.Stat = fs.statSync(song.filePath);
           const f: fs.File = fs.openSync(song.filePath, fs.OpenMode.READ_ONLY);
+          this.lastFd = f.fd;
           p.fdSrc = { fd: f.fd, offset: 0, length: st.size };
         }
       } catch (err) {
@@ -482,6 +519,22 @@ export class PlayerService {
       this.play();
     } else if (mode === C.PLAY_MODE_RANDOM) {
       this.playRandom();
+    } else if (mode === C.PLAY_MODE_ORDER) {
+      // 顺序播放：列表播完即停在第一首开头
+      if (this.index >= this.queue.length - 1) {
+        this.index = 0;
+        const first: Song = this.queue[0];
+        this.autoPlay = false;
+        this.pendingSeek = 0;
+        AppStorage.setOrCreate(C.K_SONG, first);
+        AppStorage.setOrCreate(C.K_LIKED, first.isLiked);
+        AppStorage.setOrCreate(C.K_POS, 0);
+        AppStorage.setOrCreate(C.K_DUR, first.duration);
+        this.loadSong(first);
+        promptAction.showToast({ message: '列表已播完，顺序播放结束', duration: 2000 });
+      } else {
+        this.playIndex(this.index + 1);
+      }
     } else {
       if (this.queue.length <= 1) {
         this.seek(0);
@@ -668,6 +721,14 @@ export class PlayerService {
 
   release(): void {
     this.stopBgTask();
+    try {
+      if (this.lastFd >= 0) {
+        fs.closeSync(this.lastFd);
+        this.lastFd = -1;
+      }
+    } catch (err) {
+      // 忽略
+    }
     try {
       this.avPlayer?.release();
     } catch (err) {

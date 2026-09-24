@@ -45,6 +45,8 @@ export struct PlayerPage {
   @State eqBands: number[] = [0, 0, 0, 0, 0];
   @State vol: number = 8;
   @State volShow: boolean = false;
+  @State muted: boolean = false;
+  private prevVol: number = 8;
   private volStart: number = 8;
   private model: AppModel = AppModel.getInstance();
   private player: PlayerService = PlayerService.getInstance();
@@ -104,6 +106,9 @@ export struct PlayerPage {
     if (this.mode === C.PLAY_MODE_RANDOM) {
       return '🔀';
     }
+    if (this.mode === C.PLAY_MODE_ORDER) {
+      return '➡️';
+    }
     return '🔁';
   }
 
@@ -148,7 +153,7 @@ export struct PlayerPage {
       this.openSheet('volume');
     } else if (idx === 4) {
       const choice: number = await this.model.actionMenu('定时关闭',
-        ['取消定时', '15分钟后', '30分钟后', '60分钟后', '播完这首就停']);
+        ['取消定时', '15分钟后', '30分钟后', '45分钟后', '60分钟后', '更多选项']);
       if (choice === 0) {
         this.player.setSleepTimer(0);
       } else if (choice === 1) {
@@ -156,9 +161,16 @@ export struct PlayerPage {
       } else if (choice === 2) {
         this.player.setSleepTimer(30);
       } else if (choice === 3) {
-        this.player.setSleepTimer(60);
+        this.player.setSleepTimer(45);
       } else if (choice === 4) {
-        this.player.setSleepTimer(-1);
+        this.player.setSleepTimer(60);
+      } else if (choice === 5) {
+        const more: number = await this.model.actionMenu('更多定时选项', ['90分钟后', '播完这首就停']);
+        if (more === 0) {
+          this.player.setSleepTimer(90);
+        } else if (more === 1) {
+          this.player.setSleepTimer(-1);
+        }
       }
     } else if (idx === 5) {
       const next: boolean = !floatOn;
@@ -337,7 +349,7 @@ export struct PlayerPage {
             Text(this.modeIcon())
               .fontSize(24)
               .onClick(() => {
-                const m: number = (this.mode + 1) % 3;
+                const m: number = (this.mode + 1) % 4;
                 this.player.setMode(m);
                 this.model.toast(C.playModeLabel(m));
               })
@@ -347,6 +359,12 @@ export struct PlayerPage {
               .onClick(() => {
                 this.player.prev();
               })
+              .gesture(LongPressGesture({ repeat: false })
+                .onAction(() => {
+                  // 长按上一首：快退15秒
+                  this.player.seek(Math.max(0, this.pos - 15000));
+                  this.model.toast('快退 15 秒');
+                }))
             Text(this.playing ? '⏸' : '▶')
               .fontSize(34)
               .fontColor('#FFFFFF')
@@ -355,7 +373,7 @@ export struct PlayerPage {
               .textAlign(TextAlign.Center)
               .borderRadius(38)
               .backgroundColor(this.theme)
-              .shadow({ radius: 14, color: `'#332B3A55'`, offsetY: 4 })
+              .shadow({ radius: 14, color: '#332B3A55', offsetY: 4 })
               .onClick(() => {
                 this.player.togglePlay();
               })
@@ -365,6 +383,12 @@ export struct PlayerPage {
               .onClick(() => {
                 this.player.next();
               })
+              .gesture(LongPressGesture({ repeat: false })
+                .onAction(() => {
+                  // 长按下一首：快进15秒
+                  this.player.seek(this.pos + 15000);
+                  this.model.toast('快进 15 秒');
+                }))
             Text(this.liked ? '♥' : '♡')
               .fontSize(26)
               .fontColor(this.liked ? $r('app.color.cm_accent') : $r('app.color.cm_text2'))
@@ -503,8 +527,14 @@ export struct PlayerPage {
           .fontSize(12)
           .fontColor(this.theme)
           .onClick(() => {
-            const m: number = (this.mode + 1) % 3;
+            const m: number = (this.mode + 1) % 4;
             this.player.setMode(m);
+          })
+        Text('清空')
+          .fontSize(12)
+          .fontColor($r('app.color.cm_accent'))
+          .onClick(() => {
+            this.player.clearQueue();
           })
       }
       .width('100%')
@@ -571,7 +601,7 @@ export struct PlayerPage {
               .width('100%')
               .padding({ top: 8, bottom: 8, left: 4, right: 4 })
               .borderRadius(8)
-              .backgroundColor(this.song.id === s.id ? `'#59FFE45C'` : Color.Transparent)
+              .backgroundColor(this.song.id === s.id ? '#59FFE45C' : Color.Transparent)
               .onClick(() => {
                 this.player.playIndex(i);
               })
@@ -700,6 +730,32 @@ export struct PlayerPage {
           .textAlign(TextAlign.Center)
       }
       .width('100%')
+
+      Row({ space: 10 }) {
+        Button(this.muted ? '取消静音' : '静音')
+          .height(36)
+          .fontSize(13)
+          .backgroundColor($r('app.color.cm_card'))
+          .fontColor($r('app.color.cm_text'))
+          .border({ width: 2, color: $r('app.color.cm_text') })
+          .onClick(() => {
+            if (this.muted) {
+              this.player.setMediaVolume(this.prevVol);
+              this.vol = this.prevVol;
+              this.muted = false;
+              this.model.toast('已恢复音量');
+            } else {
+              this.prevVol = this.vol > 0 ? this.vol : 8;
+              this.player.setMediaVolume(0);
+              this.vol = 0;
+              this.muted = true;
+              this.model.toast('已静音');
+            }
+          })
+        Blank()
+      }
+      .width('100%')
+
       Text('调节系统媒体音量（也可在播放页右侧边缘上下滑动调节）')
         .fontSize(11)
         .fontColor($r('app.color.cm_text2'))

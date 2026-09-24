@@ -19,6 +19,7 @@ import { OnlineService } from './OnlineService';
 import { PrefsService } from './PrefsService';
 import { MetaParser } from '../utils/MetaParser';
 import { FmtUtil } from '../utils/FmtUtil';
+import { NetUtil } from '../utils/NetUtil';
 import { Logger } from '../utils/Logger';
 
 /** 下载状态变化监听 */
@@ -52,6 +53,8 @@ export class DownloadService {
   private stats: Map<number, SpeedStat> = new Map();
   private lastDbWrite: Map<number, number> = new Map();
   private maxConcurrent: number = C.MAX_CONCURRENT;
+  /** 仅Wi-Fi网络下载 */
+  private wifiOnly: boolean = false;
 
   async init(ctx: common.UIAbilityContext): Promise<void> {
     this.ctx = ctx;
@@ -114,6 +117,12 @@ export class DownloadService {
       promptAction.showToast({ message: '该歌曲已是本地歌曲，无需下载', duration: 2000 });
       return false;
     }
+    // 网络检查：无网络直接拒绝
+    const netOk: boolean = await NetUtil.hasNet();
+    if (!netOk) {
+      promptAction.showToast({ message: '当前无网络连接，无法下载', duration: 2000 });
+      return false;
+    }
     // 查重：同名歌曲同音质已在队列或已完成
     const dup: boolean = this.tasks.some((t: DownloadTask) =>
       t.title === song.title && t.quality === quality && t.status !== C.ST_FAILED);
@@ -133,6 +142,8 @@ export class DownloadService {
     t.status = C.ST_PENDING;
     t.quality = quality;
     t.createTime = Date.now();
+    // 仅Wi-Fi下载设置：建任务时按设置指定网络类型（非Wi-Fi时系统代理会等待）
+    this.wifiOnly = PrefsService.getInstance().getBool(C.P_WIFI_ONLY, false);
     try {
       t.id = await DbService.getInstance().insertTask(t);
       this.tasks.unshift(t);
@@ -177,7 +188,7 @@ export class DownloadService {
       method: 'GET',
       mode: request.agent.Mode.BACKGROUND,
       overwrite: true,
-      network: request.agent.Network.ANY,
+      network: this.wifiOnly ? request.agent.Network.WIFI : request.agent.Network.ANY,
       title: t.title,
       description: '识曲下载'
     };

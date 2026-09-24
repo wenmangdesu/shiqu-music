@@ -76,6 +76,7 @@ export class C {
   static readonly PLAY_MODE_SINGLE: number = 0;
   static readonly PLAY_MODE_LIST: number = 1;
   static readonly PLAY_MODE_RANDOM: number = 2;
+  static readonly PLAY_MODE_ORDER: number = 3;
 
   // ============ 音质 ============
   static readonly QUALITY_STANDARD: string = 'standard';
@@ -98,6 +99,9 @@ export class C {
     }
     if (m === C.PLAY_MODE_RANDOM) {
       return '随机播放';
+    }
+    if (m === C.PLAY_MODE_ORDER) {
+      return '顺序播放';
     }
     return '列表循环';
   }
@@ -159,6 +163,7 @@ export class C {
   static readonly K_QUEUEV: string = 'kQueueVersion';    // 播放队列版本号
   static readonly K_HISTV: string = 'kHistVersion';      // 播放历史版本号
   static readonly K_FLOAT: string = 'kFloatLyrics';      // 桌面歌词开关
+  static readonly K_USERV: string = 'kUserVersion';      // 登录用户版本号
 
   // ============ 偏好键名 ============
   static readonly P_COLOR_MODE: string = 'pref_color_mode';      // auto/light/dark
@@ -175,4 +180,6 @@ export class C {
   static readonly P_LAST_QUEUE: string = 'pref_last_queue';   // 续播记忆：上次队列(filePath数组)
   static readonly P_LAST_INDEX: string = 'pref_last_index';   // 续播记忆：上次播放索引
   static readonly P_LAST_POS: string = 'pref_last_pos';       // 续播记忆：上次播放进度(ms)
+  static readonly P_WIFI_ONLY: string = 'pref_wifi_only';     // 仅Wi-Fi网络下载
+  static readonly P_USER: string = 'pref_user';               // 登录用户信息(JSON)
 }

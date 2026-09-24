@@ -16,6 +16,9 @@ import { CreatePlaylistPage } from './CreatePlaylistPage';
 import { PickSongsPage } from './PickSongsPage';
 import { DownloadPage } from './DownloadPage';
 import { SettingsPage } from './SettingsPage';
+import { LoginPage } from './LoginPage';
+import { ProfilePage } from './ProfilePage';
+import { MusicGroupPage } from './MusicGroupPage';
 
 @Entry
 @Component
@@ -44,6 +47,12 @@ struct Index {
       DownloadPage()
     } else if (name === 'Settings') {
       SettingsPage()
+    } else if (name === 'Login') {
+      LoginPage()
+    } else if (name === 'Profile') {
+      ProfilePage()
+    } else if (name === 'MusicGroup') {
+      MusicGroupPage()
     }
   }
 

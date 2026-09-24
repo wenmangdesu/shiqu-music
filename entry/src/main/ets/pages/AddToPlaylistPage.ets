@@ -53,6 +53,7 @@ export struct AddToPlaylistPage {
             .border({ width: 2, color: $r('app.color.cm_text') })
             .onClick(() => {
               this.model.likeSongs(this.model.pendingAddSongIds).then(() => {
+                this.model.pendingAddSongIds = [];
                 this.model.navStack.pop();
               });
             })
@@ -87,6 +88,7 @@ export struct AddToPlaylistPage {
               .onClick(() => {
                 const ids: number[] = this.model.pendingAddSongIds;
                 this.model.addSongsToPlaylist(p.id, ids).then((n: number) => {
+                  this.model.pendingAddSongIds = [];
                   this.model.toast(n > 0 ? `已添加 ${n} 首到「${p.name}」` : '歌曲已在该歌单中');
                   this.model.navStack.pop();
                 });
@@ -102,7 +104,7 @@ export struct AddToPlaylistPage {
               .height(44)
               .borderRadius(10)
               .justifyContent(FlexAlign.Center)
-              .backgroundColor(`'#59FFE45C'`)
+              .backgroundColor('#59FFE45C')
 
               Text('新建歌单')
                 .fontSize(15)

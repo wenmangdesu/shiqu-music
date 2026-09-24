@@ -10,6 +10,7 @@ import { PlayerService } from '../service/PlayerService';
 import { OnlineService, SearchResult } from '../service/OnlineService';
 import { DownloadService } from '../service/DownloadService';
 import { PrefsService } from '../service/PrefsService';
+import { NetUtil } from '../utils/NetUtil';
 import { SongRow } from '../view/SongRow';
 import { QualityDialog } from '../view/dialogs/QualityDialog';
 
@@ -27,6 +28,7 @@ export struct SearchPage {
   @State srcName: string = 'demo';
   @State searched: boolean = false;
   @State history: string[] = [];
+  @State suggest: string[] = [];
   private model: AppModel = AppModel.getInstance();
   private player: PlayerService = PlayerService.getInstance();
   private dlgSong: Song = new Song();
@@ -43,6 +45,42 @@ export struct SearchPage {
 
   private loadHistory(): void {
     this.history = PrefsService.getInstance().getStrArr(C.P_SEARCH_HISTORY);
+  }
+
+  /** 输入时给出本地库搜索建议 */
+  private updateSuggest(v: string): void {
+    const kw: string = v.trim().toLowerCase();
+    if (!kw || this.searched) {
+      this.suggest = [];
+      return;
+    }
+    const out: string[] = [];
+    this.model.localSongs.forEach((s: Song) => {
+      if (out.length >= 6) {
+        return;
+      }
+      if (s.title.toLowerCase().indexOf(kw) >= 0 && out.indexOf(s.title) < 0) {
+        out.push(s.title);
+      }
+      if (out.length < 6 && s.artist.toLowerCase().indexOf(kw) >= 0 && out.indexOf(s.artist) < 0) {
+        out.push(s.artist);
+      }
+    });
+    this.suggest = out;
+  }
+
+  /** 删除单条搜索历史 */
+  private removeHistory(kw: string): void {
+    const hist: string[] = this.history.filter((x: string) => x !== kw);
+    PrefsService.getInstance().putStrArr(C.P_SEARCH_HISTORY, hist);
+    this.history = hist;
+  }
+
+  /** 清空搜索历史 */
+  private clearHistory(): void {
+    PrefsService.getInstance().putStrArr(C.P_SEARCH_HISTORY, []);
+    this.history = [];
+    this.model.toast('搜索历史已清空');
   }
 
   private doLocalSearch(): void {
@@ -62,7 +100,7 @@ export struct SearchPage {
     this.localResults = out;
   }
 
-  private search(): void {
+  private async search(): Promise<void> {
     const kw: string = this.inputText.trim();
     if (!kw) {
       this.model.toast('请输入搜索关键词');
@@ -70,6 +108,7 @@ export struct SearchPage {
     }
     this.keyword = kw;
     this.searched = true;
+    this.suggest = [];
     // 保存搜索历史（去重、最多10条）
     const hist: string[] = PrefsService.getInstance().getStrArr(C.P_SEARCH_HISTORY);
     const idx: number = hist.indexOf(kw);
@@ -86,6 +125,12 @@ export struct SearchPage {
       this.doLocalSearch();
     } else {
       this.searching = true;
+      const netOk: boolean = await NetUtil.hasNet();
+      if (!netOk) {
+        this.searching = false;
+        this.model.toast('当前无网络连接，无法搜索在线音乐');
+        return;
+      }
       OnlineService.getInstance().search(kw).then((r: SearchResult) => {
         this.onlineResults = r.songs;
         this.isDemo = r.isDemo;
@@ -99,7 +144,8 @@ export struct SearchPage {
   }
 
   private async localMenu(s: Song): Promise<void> {
-    const items: string[] = ['下一首播放', s.isLiked ? '取消收藏' : '收藏', '添加到歌单'];
+    const items: string[] =
+      ['下一首播放', s.isLiked ? '取消收藏' : '收藏', '添加到歌单', '查看歌手/专辑', '分享'];
     const idx: number = await this.model.actionMenu(s.title, items);
     if (idx === 0) {
       this.player.insertNext(s);
@@ -108,6 +154,16 @@ export struct SearchPage {
       this.model.toggleLike(s);
     } else if (idx === 2) {
       this.model.pushAddToPlaylist([s.id]);
+    } else if (idx === 3) {
+      const which: number = await this.model.actionMenu('查看',
+        [`歌手：${s.artist || '未知歌手'}`, `专辑：${s.album || '未知专辑'}`]);
+      if (which === 0) {
+        this.model.pushMusicGroup('artist', s.artist || '未知歌手');
+      } else if (which === 1) {
+        this.model.pushMusicGroup('album', s.album || '未知专辑');
+      }
+    } else if (idx === 4) {
+      this.model.shareSong(s);
     }
   }
 
@@ -161,6 +217,7 @@ export struct SearchPage {
             .backgroundColor($r('app.color.cm_card'))
             .onChange((v: string) => {
               this.inputText = v;
+              this.updateSuggest(v);
             })
             .onSubmit(() => {
               this.search();
@@ -179,12 +236,41 @@ export struct SearchPage {
 
         // 内容区
         if (!this.searched) {
-          // 关键词为空：历史 + 热门
+          // 关键词为空：搜索建议 + 历史 + 热门
           Scroll() {
             Column({ space: 14 }) {
-              if (this.history.length > 0) {
-                Text('搜索历史').fontSize(14).fontWeight(FontWeight.Bold)
+              if (this.suggest.length > 0) {
+                Text('搜索建议').fontSize(14).fontWeight(FontWeight.Bold)
                   .fontColor($r('app.color.cm_text')).width('100%')
+                Flex({ wrap: FlexWrap.Wrap }) {
+                  ForEach(this.suggest, (kw: string) => {
+                    Text(kw)
+                      .fontSize(12)
+                      .fontColor($r('app.color.cm_text'))
+                      .padding({ left: 12, right: 12, top: 6, bottom: 6 })
+                      .borderRadius(14)
+                      .backgroundColor($r('app.color.cm_marker'))
+                      .margin(4)
+                      .onClick(() => {
+                        this.inputText = kw;
+                        this.search();
+                      })
+                  }, (kw: string) => `sg_${kw}`)
+                }
+                .width('100%')
+              }
+              if (this.history.length > 0) {
+                Row({ space: 10 }) {
+                  Text('搜索历史').fontSize(14).fontWeight(FontWeight.Bold)
+                    .fontColor($r('app.color.cm_text')).layoutWeight(1)
+                  Text('清空')
+                    .fontSize(12)
+                    .fontColor($r('app.color.cm_accent'))
+                    .onClick(() => {
+                      this.clearHistory();
+                    })
+                }
+                .width('100%')
                 Flex({ wrap: FlexWrap.Wrap }) {
                   ForEach(this.history, (kw: string) => {
                     Text(kw)
@@ -199,9 +285,19 @@ export struct SearchPage {
                         this.inputText = kw;
                         this.search();
                       })
+                      .gesture(LongPressGesture({ repeat: false })
+                        .onAction(() => {
+                          // 长按删除单条历史
+                          this.removeHistory(kw);
+                          this.model.toast('已删除该条历史');
+                        }))
                   }, (kw: string) => kw)
                 }
                 .width('100%')
+                Text('长按历史条目可单条删除')
+                  .fontSize(10)
+                  .fontColor($r('app.color.cm_text2'))
+                  .width('100%')
               }
               Text('热门推荐').fontSize(14).fontWeight(FontWeight.Bold)
                 .fontColor($r('app.color.cm_text')).width('100%')

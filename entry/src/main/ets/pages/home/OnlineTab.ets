@@ -8,6 +8,7 @@ import { AppModel } from '../../viewmodel/AppModel';
 import { PlayerService } from '../../service/PlayerService';
 import { OnlineService, SearchResult } from '../../service/OnlineService';
 import { DownloadService } from '../../service/DownloadService';
+import { NetUtil } from '../../utils/NetUtil';
 import { SongRow } from '../../view/SongRow';
 import { QualityDialog } from '../../view/dialogs/QualityDialog';
 
@@ -35,13 +36,19 @@ export struct OnlineTab {
     alignment: DialogAlignment.Center
   });
 
-  private search(): void {
+  private async search(): Promise<void> {
     const kw: string = this.keyword.trim();
     if (!kw) {
       this.model.toast('请输入搜索关键词');
       return;
     }
     this.searching = true;
+    const netOk: boolean = await NetUtil.hasNet();
+    if (!netOk) {
+      this.searching = false;
+      this.model.toast('当前无网络连接，无法搜索在线音乐');
+      return;
+    }
     OnlineService.getInstance().search(kw).then((r: SearchResult) => {
       this.results = r.songs;
       this.isDemo = r.isDemo;

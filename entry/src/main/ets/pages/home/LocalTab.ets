@@ -473,7 +473,8 @@ export struct LocalTab {
 
   /** 歌曲长按/更多菜单 */
   private async showMenu(s: Song): Promise<void> {
-    const items: string[] = ['下一首播放', s.isLiked ? '取消收藏' : '收藏', '添加到歌单', '从音乐库移除'];
+    const items: string[] =
+      ['下一首播放', s.isLiked ? '取消收藏' : '收藏', '添加到歌单', '查看歌手/专辑', '分享', '从音乐库移除'];
     const idx: number = await this.model.actionMenu(s.title, items);
     if (idx === 0) {
       this.player.insertNext(s);
@@ -484,6 +485,16 @@ export struct LocalTab {
       this.model.pendingAddSongIds = [s.id];
       this.pickCtrl.open();
     } else if (idx === 3) {
+      const which: number = await this.model.actionMenu('查看',
+        [`歌手：${s.artist || '未知歌手'}`, `专辑：${s.album || '未知专辑'}`]);
+      if (which === 0) {
+        this.model.pushMusicGroup('artist', s.artist || '未知歌手');
+      } else if (which === 1) {
+        this.model.pushMusicGroup('album', s.album || '未知专辑');
+      }
+    } else if (idx === 4) {
+      this.model.shareSong(s);
+    } else if (idx === 5) {
       const ok: boolean = await this.model.confirm('移除歌曲', `确定从音乐库移除「${s.title}」吗？\n（不会删除源文件）`);
       if (ok) {
         this.model.deleteLocalSong(s);

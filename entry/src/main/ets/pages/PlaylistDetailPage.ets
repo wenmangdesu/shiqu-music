@@ -21,11 +21,47 @@ export struct PlaylistDetailPage {
   @State pl: Playlist = new Playlist();
   @State songs: Song[] = [];
   @State plName: string = '歌单';
+  @State kw: string = '';
   private model: AppModel = AppModel.getInstance();
   private player: PlayerService = PlayerService.getInstance();
 
   aboutToAppear(): void {
     this.reload();
+  }
+
+  /** 歌单内搜索后的展示列表 */
+  private shown(): Song[] {
+    const k: string = this.kw.trim().toLowerCase();
+    if (!k) {
+      return this.songs;
+    }
+    const out: Song[] = [];
+    this.songs.forEach((s: Song) => {
+      if (s.title.toLowerCase().indexOf(k) >= 0 || s.artist.toLowerCase().indexOf(k) >= 0) {
+        out.push(s);
+      }
+    });
+    return out;
+  }
+
+  /** 歌单内歌曲上移/下移（我喜欢为自动汇总不支持） */
+  private moveSong(i: number, dir: number): void {
+    if (this.isLikedPl()) {
+      return;
+    }
+    const ti: number = i + dir;
+    if (ti < 0 || ti >= this.songs.length) {
+      return;
+    }
+    const ids: number[] = this.pl.songIds.slice();
+    const si: number = ids.indexOf(this.songs[i].id);
+    const sj: number = ids.indexOf(this.songs[ti].id);
+    if (si < 0 || sj < 0) {
+      return;
+    }
+    ids[si] = this.songs[ti].id;
+    ids[sj] = this.songs[i].id;
+    this.model.reorderPlaylist(this.pl.id, ids);
   }
 
   reload(): void {
@@ -193,6 +229,22 @@ export struct PlaylistDetailPage {
         .width('100%')
         .padding({ left: 16, right: 16, bottom: 8 })
 
+        // 歌单内搜索
+        Row({ space: 8 }) {
+          Text('🔍').fontSize(13).fontColor($r('app.color.cm_text2'))
+          TextInput({ text: this.kw, placeholder: '在当前歌单内搜索' })
+            .height(34)
+            .fontSize(12)
+            .layoutWeight(1)
+            .backgroundColor($r('app.color.cm_card'))
+            .border({ width: 1.5, color: $r('app.color.cm_divider') })
+            .onChange((v: string) => {
+              this.kw = v;
+            })
+        }
+        .width('100%')
+        .padding({ left: 16, right: 16, bottom: 6 })
+
         // 歌曲列表
         if (this.songs.length === 0) {
           Column({ space: 10 }) {
@@ -206,24 +258,57 @@ export struct PlaylistDetailPage {
             .width('100%')
             .layoutWeight(1)
             .justifyContent(FlexAlign.Center)
+        } else if (this.shown().length === 0) {
+          Column({ space: 10 }) {
+            Text('🔍').fontSize(36)
+            Text(`歌单内没有包含"${this.kw}"的歌曲`)
+              .fontSize(12)
+              .fontColor($r('app.color.cm_text2'))
+              .textAlign(TextAlign.Center)
+          }
+            .width('100%')
+            .layoutWeight(1)
+            .justifyContent(FlexAlign.Center)
         } else {
           List({ space: 2 }) {
-            ForEach(this.songs, (s: Song, i: number) => {
+            ForEach(this.shown(), (s: Song, i: number) => {
               ListItem() {
-                SongRow({
-                  song: s,
-                  index: i,
-                  onPlay: (x: Song): void => {
-                    const idx: number = this.songs.indexOf(x);
-                    this.player.setQueue(this.songs, idx >= 0 ? idx : 0);
-                  },
-                  onMore: (x: Song): void => {
-                    this.removeSong(x);
+                Row({ space: 4 }) {
+                  // 歌单排序（我喜欢为自动汇总，不支持手动排序）
+                  if (!this.isLikedPl() && !this.kw.trim()) {
+                    Column({ space: 10 }) {
+                      Text('↑')
+                        .fontSize(13)
+                        .fontColor(i > 0 ? $r('app.color.cm_text2') : $r('app.color.cm_divider'))
+                        .onClick(() => {
+                          this.moveSong(i, -1);
+                        })
+                      Text('↓')
+                        .fontSize(13)
+                        .fontColor(i < this.shown().length - 1 ? $r('app.color.cm_text2') : $r('app.color.cm_divider'))
+                        .onClick(() => {
+                          this.moveSong(i, 1);
+                        })
+                    }
+                    .width(20)
                   }
-                })
+                  SongRow({
+                    song: s,
+                    index: i,
+                    onPlay: (x: Song): void => {
+                      const idx: number = this.shown().indexOf(x);
+                      this.player.setQueue(this.shown(), idx >= 0 ? idx : 0);
+                    },
+                    onMore: (x: Song): void => {
+                      this.removeSong(x);
+                    }
+                  })
+                  .layoutWeight(1)
+                }
+                .width('100%')
               }
               .swipeAction({ end: this.removeBtn(s) })
-            }, (s: Song) => `${this.plVersion}_${this.libVersion}_${s.id}`)
+            }, (s: Song) => `${this.plVersion}_${this.libVersion}_${s.id}_${this.kw}`)
           }
           .layoutWeight(1)
           .width('100%')

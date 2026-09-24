@@ -38,6 +38,7 @@ export struct PlaylistPickerDialog {
       .onClick(() => {
         const ids: number[] = this.model.pendingAddSongIds;
         this.model.likeSongs(ids).then(() => {
+          this.model.pendingAddSongIds = [];
           this.close();
         });
       })
@@ -64,6 +65,7 @@ export struct PlaylistPickerDialog {
               .onClick(() => {
                 const ids: number[] = this.model.pendingAddSongIds;
                 this.model.addSongsToPlaylist(p.id, ids).then((n: number) => {
+                  this.model.pendingAddSongIds = [];
                   this.model.toast(n > 0 ? `已添加 ${n} 首到「${p.name}」` : '歌曲已在该歌单中');
                   this.close();
                 });

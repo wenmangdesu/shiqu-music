@@ -21,6 +21,7 @@ export struct SettingsPage {
   @State defQuality: string = C.QUALITY_STANDARD;
   @State concurrency: number = C.MAX_CONCURRENT;
   @State cacheSize: string = '计算中...';
+  @State wifiOnly: boolean = false;
   private model: AppModel = AppModel.getInstance();
   private player: PlayerService = PlayerService.getInstance();
   private ds: DownloadService = DownloadService.getInstance();
@@ -33,6 +34,7 @@ export struct SettingsPage {
     this.defMode = AppStorage.get<number>(C.K_MODE) ?? C.PLAY_MODE_LIST;
     this.defQuality = p.getStr(C.P_QUALITY, C.QUALITY_STANDARD);
     this.concurrency = this.ds.getConcurrency();
+    this.wifiOnly = p.getBool(C.P_WIFI_ONLY, false);
     setTimeout(() => {
       this.cacheSize = FmtUtil.fmtSize(this.calcCacheSize());
     }, 80);
@@ -200,7 +202,7 @@ export struct SettingsPage {
               Text('默认播放模式').fontSize(15).fontColor($r('app.color.cm_text')).layoutWeight(1)
               Row({ space: 6 }) {
                 ChipItem({
-                  label: '单曲循环',
+                  label: '单曲',
                   active: this.defMode === C.PLAY_MODE_SINGLE,
                   onTap: (): void => {
                     this.defMode = C.PLAY_MODE_SINGLE;
@@ -208,7 +210,7 @@ export struct SettingsPage {
                   }
                 })
                 ChipItem({
-                  label: '列表循环',
+                  label: '列表',
                   active: this.defMode === C.PLAY_MODE_LIST,
                   onTap: (): void => {
                     this.defMode = C.PLAY_MODE_LIST;
@@ -221,6 +223,14 @@ export struct SettingsPage {
                   onTap: (): void => {
                     this.defMode = C.PLAY_MODE_RANDOM;
                     this.player.setMode(C.PLAY_MODE_RANDOM);
+                  }
+                })
+                ChipItem({
+                  label: '顺序',
+                  active: this.defMode === C.PLAY_MODE_ORDER,
+                  onTap: (): void => {
+                    this.defMode = C.PLAY_MODE_ORDER;
+                    this.player.setMode(C.PLAY_MODE_ORDER);
                   }
                 })
               }
@@ -292,6 +302,23 @@ export struct SettingsPage {
                 .fontColor(this.theme)
                 .width(22)
                 .textAlign(TextAlign.Center)
+            }
+            .width('100%')
+
+            Row({ space: 10 }) {
+              Column({ space: 2 }) {
+                Text('仅Wi-Fi网络下载').fontSize(15).fontColor($r('app.color.cm_text'))
+                Text('移动网络下任务将等待Wi-Fi再开始').fontSize(11).fontColor($r('app.color.cm_text2'))
+              }
+              .layoutWeight(1)
+              .alignItems(HorizontalAlign.Start)
+
+              Toggle({ type: ToggleType.Switch, isOn: this.wifiOnly })
+                .selectedColor(this.theme)
+                .onChange((on: boolean) => {
+                  this.wifiOnly = on;
+                  PrefsService.getInstance().putBool(C.P_WIFI_ONLY, on);
+                })
             }
             .width('100%')
 
