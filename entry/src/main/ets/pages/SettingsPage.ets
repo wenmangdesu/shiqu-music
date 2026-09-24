@@ -191,6 +191,7 @@ export struct SettingsPage {
           .padding(14)
           .borderRadius(14)
           .backgroundColor($r('app.color.cm_card'))
+          .border({ width: 2, color: $r('app.color.cm_text') })
 
           // ===== 播放 =====
           this.sectionTitle('播放')
@@ -261,6 +262,7 @@ export struct SettingsPage {
           .padding(14)
           .borderRadius(14)
           .backgroundColor($r('app.color.cm_card'))
+          .border({ width: 2, color: $r('app.color.cm_text') })
 
           // ===== 下载 =====
           this.sectionTitle('下载')
@@ -311,6 +313,7 @@ export struct SettingsPage {
           .padding(14)
           .borderRadius(14)
           .backgroundColor($r('app.color.cm_card'))
+          .border({ width: 2, color: $r('app.color.cm_text') })
 
           // ===== 数据 =====
           this.sectionTitle('数据')
@@ -336,6 +339,7 @@ export struct SettingsPage {
           .padding({ left: 14, right: 14 })
           .borderRadius(14)
           .backgroundColor($r('app.color.cm_card'))
+          .border({ width: 2, color: $r('app.color.cm_text') })
 
           Column() {
             Row({ space: 10 }) {
@@ -374,6 +378,7 @@ export struct SettingsPage {
           .padding({ left: 14, right: 14 })
           .borderRadius(14)
           .backgroundColor($r('app.color.cm_card'))
+          .border({ width: 2, color: $r('app.color.cm_text') })
 
           // ===== 关于 =====
           this.sectionTitle('关于')
@@ -400,6 +405,7 @@ export struct SettingsPage {
           .padding(16)
           .borderRadius(14)
           .backgroundColor($r('app.color.cm_card'))
+          .border({ width: 2, color: $r('app.color.cm_text') })
           .alignItems(HorizontalAlign.Center)
         }
         .padding({ left: 16, right: 16, bottom: 24 })
@@ -431,10 +437,11 @@ struct ChipItem {
   build() {
     Text(this.label)
       .fontSize(13)
-      .fontColor(this.active ? '#FFFFFF' : $r('app.color.cm_text'))
+      .fontColor(this.active ? '#2B3A55' : $r('app.color.cm_text'))
       .padding({ left: 14, right: 14, top: 7, bottom: 7 })
       .borderRadius(15)
-      .backgroundColor(this.active ? this.theme : $r('app.color.cm_bg'))
+      .backgroundColor(this.active ? $r('app.color.cm_marker') : $r('app.color.cm_card'))
+      .border({ width: 2, color: $r('app.color.cm_text') })
       .onClick(() => {
         this.onTap();
       })

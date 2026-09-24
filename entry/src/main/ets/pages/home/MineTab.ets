@@ -81,7 +81,7 @@ export struct MineTab {
           .height(58)
           .borderRadius(29)
           .justifyContent(FlexAlign.Center)
-          .backgroundColor(`${this.theme}22`)
+          .backgroundColor(`'#EFE9D8'`)
 
           Column({ space: 3 }) {
             Text('识曲用户')
@@ -99,6 +99,7 @@ export struct MineTab {
         .padding(16)
         .borderRadius(16)
         .backgroundColor($r('app.color.cm_card'))
+        .border({ width: 2, color: $r('app.color.cm_text') })
         .margin({ top: 8 })
 
         // 数据统计
@@ -125,6 +126,7 @@ export struct MineTab {
         .padding({ top: 14, bottom: 14 })
         .borderRadius(16)
         .backgroundColor($r('app.color.cm_card'))
+        .border({ width: 2, color: $r('app.color.cm_text') })
 
         // 功能入口
         Column() {
@@ -143,6 +145,7 @@ export struct MineTab {
         .width('100%')
         .borderRadius(16)
         .backgroundColor($r('app.color.cm_card'))
+        .border({ width: 2, color: $r('app.color.cm_text') })
         .clip(true)
 
         // 最近播放

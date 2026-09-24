@@ -164,22 +164,17 @@ export struct PlayerPage {
   build() {
     NavDestination() {
       Stack() {
-        // ===== 背景：模糊封面 + 主题色渐变 =====
-        if (this.coverSrc() !== '') {
-          Image(this.coverSrc())
-            .width('100%')
-            .height('100%')
-            .objectFit(ImageFit.Cover)
-            .blur(90)
-            .opacity(0.35)
+        // ===== 背景：作业本横线纸 =====
+        Column() {
+          ForEach([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], (n: number) => {
+            Divider()
+              .color($r('app.color.cm_line'))
+              .strokeWidth(2)
+              .margin({ top: 46 })
+          }, (n: number) => `rule_${n}`)
         }
-        Column()
-          .width('100%')
-          .height('100%')
-          .linearGradient({
-            angle: 180,
-            colors: [[`${this.theme}55`, 0], [$r('app.color.cm_bg'), 0.55], [$r('app.color.cm_bg'), 1]]
-          })
+        .width('100%')
+        .height('100%')
 
         // ===== 主内容 =====
         Column() {
@@ -223,17 +218,34 @@ export struct PlayerPage {
             Stack() {
               Column() {
                 Column() {
-                  CoverImage({
-                    coverPath: this.song.coverPath,
-                    coverUrl: this.song.coverUrl,
-                    imgSize: 290,
-                    radius: 20
-                  })
-                    .translate({ x: this.dragX })
-                    .rotate({ y: 1, angle: this.dragX * 0.06 })
-                    .scale({ x: this.playing ? 1 : 0.95, y: this.playing ? 1 : 0.95 })
-                    .animation({ duration: 260, curve: Curve.EaseOut })
-                    .shadow({ radius: 30, color: '#55000000', offsetY: 10 })
+                  Stack() {
+                    CoverImage({
+                      coverPath: this.song.coverPath,
+                      coverUrl: this.song.coverUrl,
+                      imgSize: 290,
+                      radius: 20
+                    })
+                      .translate({ x: this.dragX })
+                      .rotate({ y: 1, angle: this.dragX * 0.06 })
+                      .scale({ x: this.playing ? 1 : 0.95, y: this.playing ? 1 : 0.95 })
+                      .animation({ duration: 260, curve: Curve.EaseOut })
+                      .shadow({ radius: 30, color: '#33000000', offsetY: 8 })
+                    // 贴照片的胶带
+                    Text(' ')
+                      .width(96)
+                      .height(26)
+                      .backgroundColor('#F6E7A9')
+                      .opacity(0.92)
+                      .rotate({ angle: -32 })
+                      .position({ x: 6, y: -8 })
+                    Text(' ')
+                      .width(96)
+                      .height(26)
+                      .backgroundColor('#F6E7A9')
+                      .opacity(0.92)
+                      .rotate({ angle: 32 })
+                      .position({ x: 190, y: -8 })
+                  }
                 }
                 .justifyContent(FlexAlign.Center)
               }
@@ -336,7 +348,7 @@ export struct PlayerPage {
               .textAlign(TextAlign.Center)
               .borderRadius(38)
               .backgroundColor(this.theme)
-              .shadow({ radius: 14, color: `${this.theme}66`, offsetY: 4 })
+              .shadow({ radius: 14, color: `'#332B3A55'`, offsetY: 4 })
               .onClick(() => {
                 this.player.togglePlay();
               })
@@ -348,7 +360,7 @@ export struct PlayerPage {
               })
             Text(this.liked ? '♥' : '♡')
               .fontSize(26)
-              .fontColor(this.liked ? this.theme : $r('app.color.cm_text2'))
+              .fontColor(this.liked ? $r('app.color.cm_accent') : $r('app.color.cm_text2'))
               .onClick(() => {
                 if (this.hasSong()) {
                   this.model.toggleLike(this.song);
@@ -552,7 +564,7 @@ export struct PlayerPage {
               .width('100%')
               .padding({ top: 8, bottom: 8, left: 4, right: 4 })
               .borderRadius(8)
-              .backgroundColor(this.song.id === s.id ? `${this.theme}12` : Color.Transparent)
+              .backgroundColor(this.song.id === s.id ? `'#59FFE45C'` : Color.Transparent)
               .onClick(() => {
                 this.player.playIndex(i);
               })

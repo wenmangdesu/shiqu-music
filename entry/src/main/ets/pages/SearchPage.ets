@@ -193,6 +193,7 @@ export struct SearchPage {
                       .padding({ left: 12, right: 12, top: 6, bottom: 6 })
                       .borderRadius(14)
                       .backgroundColor($r('app.color.cm_card'))
+                      .border({ width: 2, color: $r('app.color.cm_text') })
                       .margin(4)
                       .onClick(() => {
                         this.inputText = kw;
@@ -212,6 +213,7 @@ export struct SearchPage {
                     .padding({ left: 12, right: 12, top: 6, bottom: 6 })
                     .borderRadius(14)
                     .backgroundColor($r('app.color.cm_card'))
+                    .border({ width: 2, color: $r('app.color.cm_text') })
                     .margin(4)
                     .onClick(() => {
                       this.inputText = kw;

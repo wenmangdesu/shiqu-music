@@ -90,7 +90,7 @@ export struct SongRow {
     .width('100%')
     .padding({ left: 12, right: 4, top: 6, bottom: 6 })
     .borderRadius(10)
-    .backgroundColor(this.isCurrent() ? `${this.theme}14` : Color.Transparent)
+    .backgroundColor(this.isCurrent() ? '#59FFE45C' : Color.Transparent)
     .onClick(() => {
       if (this.selectMode) {
         this.onSelect(this.song);

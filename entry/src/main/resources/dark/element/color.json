@@ -2,35 +2,47 @@
   "color": [
     {
       "name": "start_window_background",
-      "value": "#000000"
+      "value": "#1B1E24"
     },
     {
       "name": "cm_bg",
-      "value": "#0E1116"
+      "value": "#1B1E24"
     },
     {
       "name": "cm_card",
-      "value": "#1A1F28"
+      "value": "#262B34"
     },
     {
       "name": "cm_text",
-      "value": "#E9EDF4"
+      "value": "#E8E4D6"
     },
     {
       "name": "cm_text2",
-      "value": "#8B93A5"
+      "value": "#99A1B0"
     },
     {
       "name": "cm_divider",
-      "value": "#272D38"
+      "value": "#333945"
     },
     {
       "name": "cm_icon",
-      "value": "#A8B0C0"
+      "value": "#99A1B0"
     },
     {
       "name": "cm_mask",
       "value": "#99000000"
+    },
+    {
+      "name": "cm_line",
+      "value": "#333B49"
+    },
+    {
+      "name": "cm_marker",
+      "value": "#FFE45C"
+    },
+    {
+      "name": "cm_accent",
+      "value": "#FF6B70"
     }
   ]
 }

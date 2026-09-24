@@ -92,6 +92,7 @@ export struct PlaylistPickerDialog {
     .padding(20)
     .borderRadius(16)
     .backgroundColor($r('app.color.cm_card'))
+    .border({ width: 2, color: $r('app.color.cm_text') })
     .width('88%')
   }
 }

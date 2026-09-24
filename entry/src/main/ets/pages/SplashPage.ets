@@ -1,6 +1,6 @@
 /**
- * 启动页：Logo + 版本信息
- * 等待应用初始化完成（最多2.2秒）后进入主页；4秒兜底强制跳转
+ * 启动页：笔记本涂鸦风
+ * 作业本纸张 + 涂鸦图标 + 版本信息；等待初始化完成后进入主页
  */
 import { router } from '@kit.ArkUI';
 import { C } from '../common/Constants';
@@ -49,46 +49,61 @@ struct SplashPage {
 
   build() {
     Stack() {
-      Column({ space: 16 }) {
-        // Logo
-        Column() {
-          Text('♪').fontSize(54).fontColor('#FFFFFF')
-        }
-        .width(116)
-        .height(116)
-        .borderRadius(58)
-        .justifyContent(FlexAlign.Center)
-        .linearGradient({ angle: 135, colors: [['#F3536C', 0], ['#B15CE0', 1]] })
-        .shadow({ radius: 26, color: '#55F3536C', offsetY: 8 })
+      // 作业本横线
+      Column() {
+        ForEach([1, 2, 3, 4, 5, 6, 7, 8], (n: number) => {
+          Divider()
+            .color($r('app.color.cm_line'))
+            .strokeWidth(2)
+            .margin({ top: 52 })
+        }, (n: number) => `rule_${n}`)
+      }
+      .width('100%')
+      .height('100%')
+
+      // 红色边线
+      Row()
+        .width(26)
+        .height('100%')
+        .backgroundColor('#F2A9A9')
+        .position({ x: 34, y: 0 })
+
+      Column({ space: 14 }) {
+        // 涂鸦图标
+        Image($r('app.media.startIcon'))
+          .width(120)
+          .height(120)
+          .borderRadius(24)
+          .border({ width: 3, color: $r('app.color.cm_text') })
+          .shadow({ radius: 18, color: '#33000000', offsetY: 6 })
 
         Text(C.APP_NAME)
-          .fontSize(30)
+          .fontSize(34)
           .fontWeight(FontWeight.Bold)
           .fontColor($r('app.color.cm_text'))
-        Text('SHIQU MUSIC')
-          .fontSize(12)
-          .letterSpacing(4)
+        Text('不识字，但识曲')
+          .fontSize(14)
           .fontColor($r('app.color.cm_text2'))
         Text(`版本 ${C.VERSION} · HarmonyOS`)
           .fontSize(12)
           .fontColor($r('app.color.cm_text2'))
-          .margin({ top: 6 })
+          .margin({ top: 4 })
 
-        // 加载指示点
+        // 加载指示点（红笔）
         Row({ space: 6 }) {
           ForEach([0, 1, 2], (i: number) => {
             Circle()
               .width(7)
               .height(7)
-              .fill(this.dotIdx === i ? '#F3536C' : $r('app.color.cm_divider'))
+              .fill(this.dotIdx === i ? '#E5484D' : $r('app.color.cm_divider'))
           }, (i: number) => `${i}`)
         }
-        .margin({ top: 16 })
+        .margin({ top: 12 })
       }
       .width('100%')
     }
     .width('100%')
     .height('100%')
-    .linearGradient({ angle: 180, colors: [['#FDECEF', 0], ['#F7F8FA', 1]] })
+    .backgroundColor($r('app.color.cm_bg'))
   }
 }

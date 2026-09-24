@@ -125,13 +125,13 @@ export struct PlaylistTab {
           .objectFit(ImageFit.Cover)
       } else {
         Column() {
-          Text('♪').fontSize(26).fontColor('#FFFFFF')
+          Text('♪').fontSize(26).fontColor('#8C8570')
         }
         .width('100%')
         .height(76)
         .borderRadius(10)
         .justifyContent(FlexAlign.Center)
-        .linearGradient({ angle: 135, colors: [['#7B8CEB', 0], ['#B15CE0', 1]] })
+        .linearGradient({ angle: 135, colors: [['#EFE9D8', 0], ['#DCD4BE', 1]] })
       }
       Text(pl.name)
         .fontSize(13)
@@ -146,6 +146,7 @@ export struct PlaylistTab {
     .padding(10)
     .borderRadius(14)
     .backgroundColor($r('app.color.cm_card'))
+    .border({ width: 2, color: $r('app.color.cm_text') })
     .onClick(() => {
       this.model.pushPlaylistDetail(pl.id);
     })
@@ -180,13 +181,13 @@ export struct PlaylistTab {
           // 我喜欢（默认歌单）
           Row({ space: 12 }) {
             Column() {
-              Text('♥').fontSize(26).fontColor('#FFFFFF')
+              Text('♥').fontSize(26).fontColor('#E5484D')
             }
             .width(54)
             .height(54)
             .borderRadius(12)
             .justifyContent(FlexAlign.Center)
-            .linearGradient({ angle: 135, colors: [['#F3536C', 0], ['#B15CE0', 1]] })
+            .backgroundColor($r('app.color.cm_marker'))
 
             Column({ space: 3 }) {
               Text('我喜欢')
@@ -205,7 +206,8 @@ export struct PlaylistTab {
           .width('100%')
           .padding(14)
           .borderRadius(14)
-          .backgroundColor(`${this.theme}14`)
+          .backgroundColor('#59FFE45C')
+          .border({ width: 2, color: $r('app.color.cm_text') })
           .onClick(() => {
             this.model.pushPlaylistDetail(-1);
           })

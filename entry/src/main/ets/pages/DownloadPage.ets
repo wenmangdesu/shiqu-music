@@ -92,7 +92,7 @@ export struct DownloadPage {
           .fontColor(this.theme)
           .padding({ left: 6, right: 6, top: 2, bottom: 2 })
           .borderRadius(6)
-          .backgroundColor(`${this.theme}1A`)
+          .backgroundColor(`'#1A2B3A55'`)
         Text(t.title)
           .fontSize(14)
           .maxLines(1)
@@ -143,6 +143,7 @@ export struct DownloadPage {
     .padding(12)
     .borderRadius(12)
     .backgroundColor($r('app.color.cm_card'))
+    .border({ width: 2, color: $r('app.color.cm_text') })
     .margin({ bottom: 8 })
   }
 
@@ -156,7 +157,7 @@ export struct DownloadPage {
           .fontColor(this.theme)
           .padding({ left: 6, right: 6, top: 2, bottom: 2 })
           .borderRadius(6)
-          .backgroundColor(`${this.theme}1A`)
+          .backgroundColor(`'#1A2B3A55'`)
         Text(t.title)
           .fontSize(14)
           .maxLines(1)
@@ -189,6 +190,7 @@ export struct DownloadPage {
     .padding(12)
     .borderRadius(12)
     .backgroundColor($r('app.color.cm_card'))
+    .border({ width: 2, color: $r('app.color.cm_text') })
     .margin({ bottom: 8 })
   }
 
@@ -201,7 +203,7 @@ export struct DownloadPage {
         .fontColor(this.theme)
         .padding({ left: 6, right: 6, top: 2, bottom: 2 })
         .borderRadius(6)
-        .backgroundColor(`${this.theme}1A`)
+        .backgroundColor(`'#1A2B3A55'`)
       Column({ space: 2 }) {
         Text(t.title)
           .fontSize(14)
@@ -234,6 +236,7 @@ export struct DownloadPage {
     .padding(12)
     .borderRadius(12)
     .backgroundColor($r('app.color.cm_card'))
+    .border({ width: 2, color: $r('app.color.cm_text') })
     .margin({ bottom: 8 })
   }
 

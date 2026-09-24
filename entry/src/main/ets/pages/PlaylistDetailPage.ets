@@ -128,13 +128,14 @@ export struct PlaylistDetailPage {
               .objectFit(ImageFit.Cover)
           } else {
             Column() {
-              Text(this.isLikedPl() ? '♥' : '♪').fontSize(28).fontColor('#FFFFFF')
+              Text(this.isLikedPl() ? '♥' : '♪').fontSize(28)
+                .fontColor(this.isLikedPl() ? '#E5484D' : '#8C8570')
             }
             .width(76)
             .height(76)
             .borderRadius(12)
             .justifyContent(FlexAlign.Center)
-            .linearGradient({ angle: 135, colors: [[this.theme, 0], ['#B15CE0', 1]] })
+            .backgroundColor($r('app.color.cm_marker'))
           }
 
           Column({ space: 4 }) {

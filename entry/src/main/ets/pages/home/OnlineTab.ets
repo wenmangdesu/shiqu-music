@@ -137,6 +137,7 @@ export struct OnlineTab {
                 .padding({ left: 14, right: 14, top: 7, bottom: 7 })
                 .borderRadius(16)
                 .backgroundColor($r('app.color.cm_card'))
+                .border({ width: 2, color: $r('app.color.cm_text') })
                 .margin(5)
                 .onClick(() => {
                   this.keyword = kw;

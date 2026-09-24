@@ -2,11 +2,11 @@
   "color": [
     {
       "name": "start_window_background",
-      "value": "#FFFFFF"
+      "value": "#FDFBF6"
     },
     {
       "name": "cm_bg",
-      "value": "#F4F5F7"
+      "value": "#F7F2E6"
     },
     {
       "name": "cm_card",
@@ -14,23 +14,35 @@
     },
     {
       "name": "cm_text",
-      "value": "#1A1F2B"
+      "value": "#2B3A55"
     },
     {
       "name": "cm_text2",
-      "value": "#7C8698"
+      "value": "#8E96A8"
     },
     {
       "name": "cm_divider",
-      "value": "#E8EAEE"
+      "value": "#E6E1D4"
     },
     {
       "name": "cm_icon",
-      "value": "#5A6478"
+      "value": "#A9A290"
     },
     {
       "name": "cm_mask",
       "value": "#66000000"
+    },
+    {
+      "name": "cm_line",
+      "value": "#C7DCEC"
+    },
+    {
+      "name": "cm_marker",
+      "value": "#FFE45C"
+    },
+    {
+      "name": "cm_accent",
+      "value": "#E5484D"
     }
   ]
 }

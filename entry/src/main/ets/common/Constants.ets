@@ -32,10 +32,15 @@ export class C {
   // ============ 应用信息 ============
   static readonly APP_NAME: string = '识曲';
   static readonly VERSION: string = '1.0.0';
-  static readonly DEFAULT_THEME: string = '#F3536C';
+  /** 主题色：墨蓝（笔记本涂鸦风） */
+  static readonly DEFAULT_THEME: string = '#2B3A55';
+  /** 红笔强调色（收藏/进度） */
+  static readonly ACCENT_RED: string = '#E5484D';
+  /** 荧光笔黄（选中高亮） */
+  static readonly MARKER: string = '#FFE45C';
   /** 固定主题色备选盘 */
   static readonly THEME_PALETTE: string[] =
-    ['#F3536C', '#FF9F43', '#33CCAB', '#4A90E2', '#9B59B6', '#2ECC71'];
+    ['#2B3A55', '#E5484D', '#2ECC71', '#4A90E2', '#9B59B6', '#FF9F43'];
 
   // ============ 本地音乐 ============
   /** 支持的音频格式 */

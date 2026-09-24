@@ -21,7 +21,7 @@ export struct MiniPlayerBar {
     Stack() {
       if (this.song.id !== 0 || this.song.title !== '') {
         Column() {
-          // 细进度条
+          // 细进度条（红笔）
           Progress({
             value: this.dur > 0 ? Math.min(100, this.pos / this.dur * 100) : 0,
             total: 100,
@@ -29,7 +29,7 @@ export struct MiniPlayerBar {
           })
             .style({ strokeWidth: 2 })
             .width('100%')
-            .color(this.theme)
+            .color($r('app.color.cm_accent'))
           Row({ space: 10 }) {
             CoverImage({
               coverPath: this.song.coverPath,
@@ -79,6 +79,7 @@ export struct MiniPlayerBar {
         .width('100%')
         .backgroundColor($r('app.color.cm_card'))
         .borderRadius({ topLeft: 14, topRight: 14 })
+        .border({ width: 2, color: $r('app.color.cm_text') })
         .shadow({ radius: 12, color: '#22000000', offsetY: -2 })
       } else {
         Blank().height(0)

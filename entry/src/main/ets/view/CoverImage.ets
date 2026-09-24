@@ -33,13 +33,13 @@ export struct CoverImage {
           })
       } else {
         Column() {
-          Text('♪').fontSize(this.imgSize * 0.42).fontColor('#FFFFFF')
+          Text('♪').fontSize(this.imgSize * 0.42).fontColor('#8C8570')
         }
         .width(this.imgSize)
         .height(this.imgSize)
         .borderRadius(this.radius)
         .justifyContent(FlexAlign.Center)
-        .linearGradient({ angle: 135, colors: [['#7B8CEB', 0], ['#B15CE0', 1]] })
+        .linearGradient({ angle: 135, colors: [['#EFE9D8', 0], ['#DCD4BE', 1]] })
       }
     }
     .width(this.imgSize)

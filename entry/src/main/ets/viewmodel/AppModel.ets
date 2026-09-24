@@ -461,7 +461,7 @@ export class AppModel {
         message: msg,
         buttons: [
           { text: '取消', color: $r('app.color.cm_text2') },
-          { text: '确定', color: '#F3536C' }
+          { text: '确定', color: '#E5484D' }
         ]
       }).then((result: promptAction.ShowDialogSuccessResponse) => {
         resolve(result.index === 1);

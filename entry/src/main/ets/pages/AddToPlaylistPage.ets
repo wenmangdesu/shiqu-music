@@ -30,13 +30,13 @@ export struct AddToPlaylistPage {
             // 我喜欢
             Row({ space: 12 }) {
               Column() {
-                Text('♥').fontSize(20).fontColor('#FFFFFF')
+                Text('♥').fontSize(20).fontColor('#E5484D')
               }
               .width(44)
               .height(44)
               .borderRadius(10)
               .justifyContent(FlexAlign.Center)
-              .linearGradient({ angle: 135, colors: [['#F3536C', 0], ['#B15CE0', 1]] })
+              .backgroundColor($r('app.color.cm_marker'))
 
               Text('我喜欢')
                 .fontSize(15)
@@ -50,6 +50,7 @@ export struct AddToPlaylistPage {
             .padding(12)
             .borderRadius(12)
             .backgroundColor($r('app.color.cm_card'))
+            .border({ width: 2, color: $r('app.color.cm_text') })
             .onClick(() => {
               this.model.likeSongs(this.model.pendingAddSongIds).then(() => {
                 this.model.navStack.pop();
@@ -82,6 +83,7 @@ export struct AddToPlaylistPage {
               .padding(12)
               .borderRadius(12)
               .backgroundColor($r('app.color.cm_card'))
+              .border({ width: 2, color: $r('app.color.cm_text') })
               .onClick(() => {
                 const ids: number[] = this.model.pendingAddSongIds;
                 this.model.addSongsToPlaylist(p.id, ids).then((n: number) => {
@@ -100,7 +102,7 @@ export struct AddToPlaylistPage {
               .height(44)
               .borderRadius(10)
               .justifyContent(FlexAlign.Center)
-              .backgroundColor(`${this.theme}18`)
+              .backgroundColor(`'#59FFE45C'`)
 
               Text('新建歌单')
                 .fontSize(15)
@@ -110,6 +112,7 @@ export struct AddToPlaylistPage {
             .padding(12)
             .borderRadius(12)
             .backgroundColor($r('app.color.cm_card'))
+            .border({ width: 2, color: $r('app.color.cm_text') })
             .onClick(() => {
               this.model.pushCreatePlaylist(-1);
             })

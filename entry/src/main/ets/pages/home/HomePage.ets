@@ -18,10 +18,13 @@ export struct HomePage {
     Column({ space: 2 }) {
       Text(icon)
         .fontSize(21)
-        .fontColor(this.curTab === idx ? this.theme : $r('app.color.cm_icon'))
+        .fontColor(this.curTab === idx ? $r('app.color.cm_text') : $r('app.color.cm_icon'))
       Text(label)
         .fontSize(10)
-        .fontColor(this.curTab === idx ? this.theme : $r('app.color.cm_text2'))
+        .fontColor(this.curTab === idx ? $r('app.color.cm_text') : $r('app.color.cm_text2'))
+        .padding({ left: 10, right: 10, top: 2, bottom: 2 })
+        .borderRadius(8)
+        .backgroundColor(this.curTab === idx ? $r('app.color.cm_marker') : Color.Transparent)
     }
     .width('25%')
     .justifyContent(FlexAlign.Center)
