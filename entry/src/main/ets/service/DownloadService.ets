@@ -179,7 +179,7 @@ export class DownloadService {
       overwrite: true,
       network: request.agent.Network.ANY,
       title: t.title,
-      description: '云悦音乐下载'
+      description: '识曲下载'
     };
     try {
       const agentTask: request.agent.Task = await request.agent.create(this.ctx, cfg);
@@ -302,7 +302,7 @@ export class DownloadService {
       const song: Song = new Song();
       song.title = t.title;
       song.artist = t.artist || '未知歌手';
-      song.album = `云悦音乐·${C.qualityLabel(t.quality)}`;
+      song.album = `识曲·${C.qualityLabel(t.quality)}`;
       song.duration = meta.duration;
       song.filePath = t.filePath;
       song.coverPath = meta.coverPath;

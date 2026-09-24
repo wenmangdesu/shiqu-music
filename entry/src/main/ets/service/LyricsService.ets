@@ -134,7 +134,7 @@ export class LyricsService {
           expectDataType: http.HttpDataType.STRING,
           connectTimeout: 6000,
           readTimeout: 8000,
-          header: { 'User-Agent': 'CloudMusic/1.0.0' }
+          header: { 'User-Agent': 'ShiQu/1.0.0' }
         });
         if (resp.responseCode !== 200) {
           return '';

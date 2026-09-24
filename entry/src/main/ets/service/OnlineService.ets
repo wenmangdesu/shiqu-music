@@ -200,11 +200,11 @@ export class OnlineService {
 
   /** 生成演示搜索结果（可在线播放） */
   private static buildDemo(keyword: string): Song[] {
-    const kw: string = keyword.trim() || '云悦';
+    const kw: string = keyword.trim() || '识曲';
     const suffixes: string[] =
       ['（Demo版）', '钢琴版', '现场版', '伴奏版', '纯音乐', '混音版', '合唱版', '独奏版'];
-    const artists: string[] = ['云悦电台', 'Demo乐队', '晨星组合', '旅途合唱团', '南巷乐团', '云端少年', '北岛歌者', '夏日计划'];
-    const albums: string[] = ['云悦精选集', 'Demo合集 Vol.1', '在线试听榜', '热歌速递', '轻音慢享', '城市夜曲', '晨光歌单', '耳机里的世界'];
+    const artists: string[] = ['识曲电台', 'Demo乐队', '晨星组合', '旅途合唱团', '南巷乐团', '云端少年', '北岛歌者', '夏日计划'];
+    const albums: string[] = ['识曲精选集', 'Demo合集 Vol.1', '在线试听榜', '热歌速递', '轻音慢享', '城市夜曲', '晨光歌单', '耳机里的世界'];
     const durations: number[] = [371000, 412000, 385000, 443000, 356000, 398000, 421000, 367000];
     const songs: Song[] = [];
     for (let i = 0; i < 8; i++) {
@@ -236,7 +236,7 @@ export class OnlineService {
         expectDataType: http.HttpDataType.STRING,
         connectTimeout: 8000,
         readTimeout: 10000,
-        header: { 'User-Agent': 'CloudMusic/1.0.0' }
+        header: { 'User-Agent': 'ShiQu/1.0.0' }
       });
       if (resp.responseCode !== 200) {
         throw new Error(`HTTP ${resp.responseCode}`);

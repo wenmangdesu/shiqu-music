@@ -20,7 +20,7 @@ export class PrefsService {
 
   init(ctx: common.UIAbilityContext): void {
     try {
-      this.store = preferences.getPreferencesSync(ctx, { name: 'cloudmusic_prefs' });
+      this.store = preferences.getPreferencesSync(ctx, { name: 'shiqu_prefs' });
     } catch (err) {
       Logger.e('Prefs', '初始化失败');
     }

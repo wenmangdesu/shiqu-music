@@ -494,7 +494,7 @@ export class PlayerService {
         notificationContentType: notificationManager.ContentType.NOTIFICATION_CONTENT_BASIC_TEXT,
         normal: {
           title: `${playing ? '正在播放' : '已暂停'}：${song.title}`,
-          text: `${song.artist || '未知歌手'} · ${FmtUtil.fmtDuration(song.duration)} · 云悦音乐`,
+          text: `${song.artist || '未知歌手'} · ${FmtUtil.fmtDuration(song.duration)} · 识曲`,
           additionalText: ''
         }
       }

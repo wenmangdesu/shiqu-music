@@ -65,7 +65,7 @@ struct SplashPage {
           .fontSize(30)
           .fontWeight(FontWeight.Bold)
           .fontColor($r('app.color.cm_text'))
-        Text('CLOUD JOY MUSIC')
+        Text('SHIQU MUSIC')
           .fontSize(12)
           .letterSpacing(4)
           .fontColor($r('app.color.cm_text2'))

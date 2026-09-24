@@ -31,7 +31,7 @@ export class DbService {
       return;
     }
     const config: relationalStore.StoreConfig = {
-      name: 'cloudmusic.db',
+      name: 'shiqu.db',
       securityLevel: relationalStore.SecurityLevel.S1
     };
     this.store = await relationalStore.getRdbStore(ctx, config);

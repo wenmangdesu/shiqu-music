@@ -1,4 +1,6 @@
-# 云悦音乐 (Cloud Joy Music)
+# 识曲 (ShiQu Music)
+
+> 不识字，但识曲。
 
 一款使用 **ArkTS + ArkUI（声明式范式）** 开发的鸿蒙原生音乐播放器，基于 **Stage 模型**，最低兼容 **API 23**（工程 targetSdk 为 API 24 / HarmonyOS 6.1.1）。
 
@@ -114,7 +116,7 @@ entry/src/main/ets/
 ```
 
 ### 数据存储位置
-- 数据库/偏好：应用沙箱（`cloudmusic.db`、`cloudmusic_prefs`）
+- 数据库/偏好：应用沙箱（`shiqu.db`、`shiqu_prefs`）
 - 下载音乐：`files/download/`（request.agent 先落临时目录 cache/download，完成后自动转存持久目录）
 - 手动导入：`files/imported/`
 - 封面/歌词缓存：`cache/covers/`、`cache/lyrics/`

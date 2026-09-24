@@ -84,7 +84,7 @@ export struct MineTab {
           .backgroundColor(`${this.theme}22`)
 
           Column({ space: 3 }) {
-            Text('云悦用户')
+            Text('识曲用户')
               .fontSize(18)
               .fontWeight(FontWeight.Bold)
               .fontColor($r('app.color.cm_text'))

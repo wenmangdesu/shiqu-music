@@ -18,39 +18,39 @@ export default class EntryAbility extends UIAbility {
     try {
       this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
     } catch (err) {
-      hilog.error(DOMAIN, 'CloudMusic', 'setColorMode失败: %{public}s', JSON.stringify(err));
+      hilog.error(DOMAIN, 'ShiQu', 'setColorMode失败: %{public}s', JSON.stringify(err));
     }
-    hilog.info(DOMAIN, 'CloudMusic', '应用创建');
+    hilog.info(DOMAIN, 'ShiQu', '应用创建');
     // 异步初始化，不阻塞窗口加载；启动页会等待其完成
     AppModel.getInstance().initApp(this.context);
   }
 
   onDestroy(): void {
-    hilog.info(DOMAIN, 'CloudMusic', '应用销毁');
+    hilog.info(DOMAIN, 'ShiQu', '应用销毁');
     PlayerService.getInstance().release();
   }
 
   onWindowStageCreate(windowStage: window.WindowStage): void {
-    hilog.info(DOMAIN, 'CloudMusic', '窗口创建，加载启动页');
+    hilog.info(DOMAIN, 'ShiQu', '窗口创建，加载启动页');
     windowStage.loadContent('pages/SplashPage', (err: BusinessError) => {
       if (err.code) {
-        hilog.error(DOMAIN, 'CloudMusic', '加载启动页失败: %{public}s', JSON.stringify(err));
+        hilog.error(DOMAIN, 'ShiQu', '加载启动页失败: %{public}s', JSON.stringify(err));
         return;
       }
-      hilog.info(DOMAIN, 'CloudMusic', '启动页加载完成');
+      hilog.info(DOMAIN, 'ShiQu', '启动页加载完成');
     });
   }
 
   onWindowStageDestroy(): void {
-    hilog.info(DOMAIN, 'CloudMusic', '窗口销毁');
+    hilog.info(DOMAIN, 'ShiQu', '窗口销毁');
   }
 
   onForeground(): void {
-    hilog.info(DOMAIN, 'CloudMusic', '回到前台');
+    hilog.info(DOMAIN, 'ShiQu', '回到前台');
   }
 
   onBackground(): void {
     // 退到后台时播放由长时任务(AUDIO_PLAYBACK)保持
-    hilog.info(DOMAIN, 'CloudMusic', '退到后台');
+    hilog.info(DOMAIN, 'ShiQu', '退到后台');
   }
 }

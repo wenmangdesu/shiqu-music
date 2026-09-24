@@ -27,7 +27,7 @@ export class AvSessionHelper {
     }
     this.inited = true;
     try {
-      this.session = await avSession.createAVSession(ctx, 'cloudMusicSession', 'audio');
+      this.session = await avSession.createAVSession(ctx, 'shiquSession', 'audio');
       const s: avSession.AVSession = this.session;
       // 注册系统媒体控制命令
       s.on('play', () => {

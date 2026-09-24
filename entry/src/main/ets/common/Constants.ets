@@ -30,7 +30,7 @@ export class QualityRow {
 
 export class C {
   // ============ 应用信息 ============
-  static readonly APP_NAME: string = '云悦音乐';
+  static readonly APP_NAME: string = '识曲';
   static readonly VERSION: string = '1.0.0';
   static readonly DEFAULT_THEME: string = '#F3536C';
   /** 固定主题色备选盘 */
