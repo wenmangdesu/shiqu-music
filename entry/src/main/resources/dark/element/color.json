@@ -1,0 +1,36 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#000000"
+    },
+    {
+      "name": "cm_bg",
+      "value": "#0E1116"
+    },
+    {
+      "name": "cm_card",
+      "value": "#1A1F28"
+    },
+    {
+      "name": "cm_text",
+      "value": "#E9EDF4"
+    },
+    {
+      "name": "cm_text2",
+      "value": "#8B93A5"
+    },
+    {
+      "name": "cm_divider",
+      "value": "#272D38"
+    },
+    {
+      "name": "cm_icon",
+      "value": "#A8B0C0"
+    },
+    {
+      "name": "cm_mask",
+      "value": "#99000000"
+    }
+  ]
+}
