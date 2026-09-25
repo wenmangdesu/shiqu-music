@@ -3,7 +3,7 @@
  * 修改头像（相册选择，Mock阶段保存到本地沙箱）、昵称、性别、生日、地区、简介；退出登录
  */
 import { photoAccessHelper } from '@kit.MediaLibraryKit';
-import { fs } from '@kit.CoreFileKit';
+import fs from '@kit.CoreFileKit';
 import { UserService } from '../service/UserService';
 import { LibraryService } from '../service/LibraryService';
 import { AppModel } from '../viewmodel/AppModel';

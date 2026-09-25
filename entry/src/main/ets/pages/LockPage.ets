@@ -66,7 +66,7 @@ struct LockPage {
   }
 
   @Builder
-  key(d: string, label: string) {
+  padKey(d: string, label: string) {
     Column() {
       Text(label)
         .fontSize(24)
@@ -144,7 +144,7 @@ struct LockPage {
               if (d === 'none') {
                 Blank()
               } else {
-                this.key(d, d === 'del' ? '⌫' : d)
+                this.padKey(d, d === 'del' ? '⌫' : d)
               }
             }
           }, (d: string) => d)

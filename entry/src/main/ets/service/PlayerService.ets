@@ -114,10 +114,10 @@ export class PlayerService {
         }
         const list: audio.AudioDeviceDescriptors = action.deviceDescriptors;
         for (let i = 0; i < list.length; i++) {
-          const dt: audio.AudioDeviceType = list[i].deviceType;
-          if (dt === audio.AudioDeviceType.WIRED_HEADSET ||
-            dt === audio.AudioDeviceType.WIRED_HEADPHONES ||
-            dt === audio.AudioDeviceType.BLUETOOTH_A2DP) {
+          const dt: audio.DeviceType = list[i].deviceType;
+          if (dt === audio.DeviceType.WIRED_HEADSET ||
+            dt === audio.DeviceType.WIRED_HEADPHONES ||
+            dt === audio.DeviceType.BLUETOOTH_A2DP) {
             this.pause();
             promptAction.showToast({ message: '耳机已断开，已暂停播放', duration: 2000 });
             break;

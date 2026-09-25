@@ -41,7 +41,7 @@ export struct SearchPage {
       }
     }),
     autoCancel: true,
-    alignment: DialogAlignment.Center
+    alignment: DialogAlignment.Center,
     customStyle: true
   });
 
