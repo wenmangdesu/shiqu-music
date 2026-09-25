@@ -170,6 +170,8 @@ export class AppModel {
       LibraryService.getInstance().scanSandbox().then((n: number) => {
         if (n > 0) {
           this.reloadSongs();
+          // 让用户确认内置歌曲已就位（进入主页后可见）
+          this.toast(`已发现 ${n} 首歌曲，就在「我的音乐」`);
         }
       }).catch(() => {});
       // 7. 通知授权（首次弹窗）
