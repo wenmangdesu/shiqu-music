@@ -61,6 +61,7 @@ export struct PlayerPage {
     }),
     autoCancel: true,
     alignment: DialogAlignment.Center
+    customStyle: true
   });
 
   aboutToAppear(): void {

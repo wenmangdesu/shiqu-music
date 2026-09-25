@@ -5,6 +5,7 @@
 import { Song } from '../model/Song';
 import { C } from '../common/Constants';
 import { AppModel } from '../viewmodel/AppModel';
+import { LibraryService } from '../service/LibraryService';
 import { SongRow } from '../view/SongRow';
 
 @Component
@@ -21,6 +22,18 @@ export struct PickSongsPage {
 
   reload(): void {
     this.songs = this.model.localSongs.slice();
+  }
+
+  /** 直接从本地选择音频导入音乐库（导入完成后新歌立即可选） */
+  private importLocal(): void {
+    LibraryService.getInstance().importPickedAudio().then((n: number) => {
+      if (n > 0) {
+        this.model.reloadSongs().then(() => {
+          this.reload();
+        });
+      }
+    }).catch(() => {
+    });
   }
 
   private toggleSelect(s: Song): void {
@@ -64,6 +77,12 @@ export struct PickSongsPage {
               }
             })
           Blank()
+          Text('⤓ 从本地导入')
+            .fontSize(14)
+            .fontColor($r('app.color.cm_accent'))
+            .onClick(() => {
+              this.importLocal();
+            })
           Text(`已选 ${this.selectedIds.length} 首`)
             .fontSize(13)
             .fontColor($r('app.color.cm_text2'))
@@ -74,9 +93,10 @@ export struct PickSongsPage {
         if (this.songs.length === 0) {
           Column({ space: 8 }) {
             Text('🎵').fontSize(38)
-            Text('本地音乐库为空，请先导入或下载歌曲')
+            Text('本地音乐库为空，可点击右上角"从本地导入"')
               .fontSize(12)
               .fontColor($r('app.color.cm_text2'))
+              .textAlign(TextAlign.Center)
           }
             .width('100%')
             .layoutWeight(1)

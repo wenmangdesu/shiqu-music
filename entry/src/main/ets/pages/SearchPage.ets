@@ -42,6 +42,7 @@ export struct SearchPage {
     }),
     autoCancel: true,
     alignment: DialogAlignment.Center
+    customStyle: true
   });
 
   private loadHistory(): void {

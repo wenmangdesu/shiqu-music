@@ -58,7 +58,8 @@ export struct LocalTab {
   private pickCtrl: CustomDialogController = new CustomDialogController({
     builder: PlaylistPickerDialog(),
     autoCancel: true,
-    alignment: DialogAlignment.Center
+    alignment: DialogAlignment.Center,
+    customStyle: true
   });
 
   aboutToAppear(): void {

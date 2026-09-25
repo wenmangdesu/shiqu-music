@@ -35,6 +35,7 @@ export struct OnlineTab {
     }),
     autoCancel: true,
     alignment: DialogAlignment.Center
+    customStyle: true
   });
 
   private async search(): Promise<void> {

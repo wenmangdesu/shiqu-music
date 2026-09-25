@@ -29,6 +29,7 @@ export struct PlaylistTab {
     }),
     autoCancel: true,
     alignment: DialogAlignment.Center
+    customStyle: true
   });
 
   aboutToAppear(): void {
