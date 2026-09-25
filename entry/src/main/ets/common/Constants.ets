@@ -184,4 +184,5 @@ export class C {
   static readonly P_USER: string = 'pref_user';               // 登录用户信息(JSON)
   static readonly P_LOCK_ON: string = 'pref_lock_on';         // 应用锁开关
   static readonly P_LOCK_HASH: string = 'pref_lock_hash';     // 应用锁密码的SHA-256
+  static readonly P_DEMO_AUDIO: string = 'pref_demo_audio';   // 内置演示音频已解压标记
 }

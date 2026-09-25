@@ -14,6 +14,7 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { Song } from '../model/Song';
 import { C } from '../common/Constants';
 import { DbService } from './DbService';
+import { PrefsService } from './PrefsService';
 import { MetaParser } from '../utils/MetaParser';
 import { FmtUtil } from '../utils/FmtUtil';
 import { Logger } from '../utils/Logger';
@@ -52,6 +53,8 @@ export class LibraryService {
     if (!this.ctx || !DbService.getInstance().ready) {
       return 0;
     }
+    // é¦æ¬¡å¯å¨åè§£ååç½®æ¼ç¤ºé³é¢ï¼ä¾¿äºå³å»æµè¯æ­æ¾
+    await this.extractBundledDemo();
     const dirs: string[] = [
       `${this.ctx.filesDir}/${C.DL_DIR}`,
       `${this.ctx.filesDir}/${C.IMPORT_DIR}`,
@@ -69,6 +72,40 @@ export class LibraryService {
     }
     Logger.i('Library', `扫描完成，新增${added}首`);
     return added;
+  }
+
+  /**
+   * è§£ååç½®æ¼ç¤ºé³é¢ï¼rawfile/demoï¼å° files/music
+   * ä»é¦æ¬¡æ§è¡ï¼åå¥½æ è®°ï¼ï¼æä»¶ç¼ºå¤±ï¼å¦å¼æºå¹²ååéï¼æ¶éé»è·³è¿
+   */
+  private async extractBundledDemo(): Promise<void> {
+    if (!this.ctx) {
+      return;
+    }
+    const prefs: PrefsService = PrefsService.getInstance();
+    if (prefs.getBool(C.P_DEMO_AUDIO, false)) {
+      return;
+    }
+    try {
+      const data: Uint8Array =
+        await this.ctx.resourceManager.getRawFileContent('demo/alaska_bay.m4a');
+      if (data.length < 1024) {
+        return;
+      }
+      const dir: string = `${this.ctx.filesDir}/music`;
+      MetaParser.ensureDir(dir);
+      const dest: string = `${dir}/` + 'é¿ææ¯å æµ·æ¹¾ - MeUmy' + '.m4a';
+      const f: fs.File =
+        fs.openSync(dest, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE | fs.OpenMode.TRUNC);
+      const ab: ArrayBuffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+      fs.writeSync(f.fd, ab);
+      fs.closeSync(f);
+      prefs.putBool(C.P_DEMO_AUDIO, true);
+      Logger.i('Library', 'åç½®æ¼ç¤ºé³é¢å·²è§£å');
+    } catch (err) {
+      // rawfileç¼ºå¤±æåå¥å¤±è´¥ï¼è·³è¿ï¼ä¸æ¬¡å¯å¨éè¯
+      Logger.w('Library', 'æ¼ç¤ºé³é¢è§£åè·³è¿');
+    }
   }
 
   private async walkDir(dir: string, existed: Set<string>, depth: number): Promise<number> {
