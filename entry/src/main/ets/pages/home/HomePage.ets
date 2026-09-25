@@ -25,6 +25,7 @@ export struct HomePage {
         .padding({ left: 10, right: 10, top: 2, bottom: 2 })
         .borderRadius(8)
         .backgroundColor(this.curTab === idx ? $r('app.color.cm_marker') : Color.Transparent)
+        .animation({ duration: 250, curve: Curve.EaseOut })
     }
     .width('25%')
     .justifyContent(FlexAlign.Center)

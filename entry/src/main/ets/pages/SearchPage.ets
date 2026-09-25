@@ -17,6 +17,7 @@ import { QualityDialog } from '../view/dialogs/QualityDialog';
 @Component
 export struct SearchPage {
   @StorageProp(C.K_THEME) theme: string = C.DEFAULT_THEME;
+  @StorageProp('kIsOnline') isOnline: boolean = true;
   @StorageProp(C.K_LIBV) @Watch('doLocalSearch') libVersion: number = 0;
   @State modeLocal: boolean = true;
   @State keyword: string = '';
@@ -233,6 +234,23 @@ export struct SearchPage {
         }
         .width('100%')
         .padding({ left: 16, right: 16, top: 8, bottom: 10 })
+
+        // 离线横幅（实时监听，在线模式下显示）
+        if (!this.modeLocal && !this.isOnline) {
+          Row({ space: 8 }) {
+            Text('⚠').fontSize(14).fontColor($r('app.color.cm_accent'))
+            Text('当前无网络连接，在线功能不可用')
+              .fontSize(12)
+              .fontColor($r('app.color.cm_accent'))
+              .layoutWeight(1)
+          }
+          .width('calc(100% - 32px)')
+          .padding(10)
+          .borderRadius(10)
+          .backgroundColor('#1AE5484D')
+          .border({ width: 2, color: $r('app.color.cm_accent') })
+          .margin({ bottom: 8 })
+        }
 
         // 内容区
         if (!this.searched) {

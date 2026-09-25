@@ -9,6 +9,7 @@ import { window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { AppModel } from '../viewmodel/AppModel';
 import { PlayerService } from '../service/PlayerService';
+import { NetUtil } from '../utils/NetUtil';
 
 const DOMAIN: number = 0x0001;
 
@@ -21,6 +22,8 @@ export default class EntryAbility extends UIAbility {
       hilog.error(DOMAIN, 'ShiQu', 'setColorMode失败: %{public}s', JSON.stringify(err));
     }
     hilog.info(DOMAIN, 'ShiQu', '应用创建');
+    // 启动实时网络监听（离线状态响应式发布到 AppStorage）
+    NetUtil.startMonitor();
     // 异步初始化，不阻塞窗口加载；启动页会等待其完成
     AppModel.getInstance().initApp(this.context);
   }

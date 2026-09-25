@@ -5,6 +5,7 @@
 import { router } from '@kit.ArkUI';
 import { C } from '../common/Constants';
 import { AppModel } from '../viewmodel/AppModel';
+import { PrefsService } from '../service/PrefsService';
 
 @Entry
 @Component
@@ -42,7 +43,10 @@ struct SplashPage {
       return;
     }
     this.jumped = true;
-    router.replaceUrl({ url: 'pages/Index' }).catch(() => {
+    // 开启了应用锁则先进入锁屏页
+    const lockOn: boolean = PrefsService.getInstance().getBool(C.P_LOCK_ON, false);
+    const target: string = lockOn ? 'pages/LockPage' : 'pages/Index';
+    router.replaceUrl({ url: target }).catch(() => {
       // 跳转失败保持当前页
     });
   }

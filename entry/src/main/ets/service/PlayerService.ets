@@ -207,6 +207,20 @@ export class PlayerService {
       this.sleepAt = 0;
       this.pause();
       promptAction.showToast({ message: '定时关闭：已暂停播放', duration: 2000 });
+      // 后台场景 toast 不可见，补发一条本地通知
+      const s: Song | null = this.currentSong();
+      const req: notificationManager.NotificationRequest = {
+        id: C.NOTIFY_ID + 1,
+        content: {
+          notificationContentType: notificationManager.ContentType.NOTIFICATION_CONTENT_BASIC_TEXT,
+          normal: {
+            title: '定时关闭',
+            text: s ? `已暂停播放：${s.title}` : '已按设定停止播放',
+            additionalText: ''
+          }
+        }
+      };
+      notificationManager.publish(req).catch(() => {});
     }
   }
 

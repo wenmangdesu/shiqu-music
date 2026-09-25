@@ -46,6 +46,7 @@ export struct PlayerPage {
   @State vol: number = 8;
   @State volShow: boolean = false;
   @State muted: boolean = false;
+  @State playPressed: boolean = false;
   private prevVol: number = 8;
   private volStart: number = 8;
   private model: AppModel = AppModel.getInstance();
@@ -374,6 +375,15 @@ export struct PlayerPage {
               .borderRadius(38)
               .backgroundColor(this.theme)
               .shadow({ radius: 14, color: '#332B3A55', offsetY: 4 })
+              .scale({ x: this.playPressed ? 0.92 : 1, y: this.playPressed ? 0.92 : 1 })
+              .animation({ duration: 130, curve: Curve.EaseOut })
+              .onTouch((event: TouchEvent) => {
+                if (event.type === TouchType.Down) {
+                  this.playPressed = true;
+                } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+                  this.playPressed = false;
+                }
+              })
               .onClick(() => {
                 this.player.togglePlay();
               })

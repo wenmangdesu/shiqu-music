@@ -182,4 +182,6 @@ export class C {
   static readonly P_LAST_POS: string = 'pref_last_pos';       // 续播记忆：上次播放进度(ms)
   static readonly P_WIFI_ONLY: string = 'pref_wifi_only';     // 仅Wi-Fi网络下载
   static readonly P_USER: string = 'pref_user';               // 登录用户信息(JSON)
+  static readonly P_LOCK_ON: string = 'pref_lock_on';         // 应用锁开关
+  static readonly P_LOCK_HASH: string = 'pref_lock_hash';     // 应用锁密码的SHA-256
 }

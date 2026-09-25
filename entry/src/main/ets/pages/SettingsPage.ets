@@ -6,6 +6,7 @@
 import fs from '@ohos.file.fs';
 import { C } from '../common/Constants';
 import { FmtUtil } from '../utils/FmtUtil';
+import { CryptoUtil } from '../utils/CryptoUtil';
 import { AppModel } from '../viewmodel/AppModel';
 import { PlayerService } from '../service/PlayerService';
 import { DownloadService } from '../service/DownloadService';
@@ -22,6 +23,13 @@ export struct SettingsPage {
   @State concurrency: number = C.MAX_CONCURRENT;
   @State cacheSize: string = '计算中...';
   @State wifiOnly: boolean = false;
+  @State lockOn: boolean = false;
+  @State showLockSetup: boolean = false;
+  @State showLockDisable: boolean = false;
+  @State lockPwd: string = '';
+  @State lockPwd2: string = '';
+  @State lockOld: string = '';
+  @State lockBusy: boolean = false;
   private model: AppModel = AppModel.getInstance();
   private player: PlayerService = PlayerService.getInstance();
   private ds: DownloadService = DownloadService.getInstance();
@@ -35,6 +43,7 @@ export struct SettingsPage {
     this.defQuality = p.getStr(C.P_QUALITY, C.QUALITY_STANDARD);
     this.concurrency = this.ds.getConcurrency();
     this.wifiOnly = p.getBool(C.P_WIFI_ONLY, false);
+    this.lockOn = p.getBool(C.P_LOCK_ON, false);
     setTimeout(() => {
       this.cacheSize = FmtUtil.fmtSize(this.calcCacheSize());
     }, 80);
@@ -267,6 +276,150 @@ export struct SettingsPage {
               }
             }
             .width('100%')
+          }
+          .width('100%')
+          .padding(14)
+          .borderRadius(14)
+          .backgroundColor($r('app.color.cm_card'))
+          .border({ width: 2, color: $r('app.color.cm_text') })
+
+          // ===== 安全 =====
+          this.sectionTitle('安全')
+          Column({ space: 14 }) {
+            Row({ space: 10 }) {
+              Column({ space: 2 }) {
+                Text('应用锁').fontSize(15).fontColor($r('app.color.cm_text'))
+                Text('启动应用时需输入4位密码解锁').fontSize(11).fontColor($r('app.color.cm_text2'))
+              }
+              .layoutWeight(1)
+              .alignItems(HorizontalAlign.Start)
+
+              Toggle({ type: ToggleType.Switch, isOn: this.lockOn })
+                .selectedColor(this.theme)
+                .onChange((on: boolean) => {
+                  if (on === this.lockOn) {
+                    return;
+                  }
+                  if (on) {
+                    this.lockPwd = '';
+                    this.lockPwd2 = '';
+                    this.showLockSetup = true;
+                  } else {
+                    this.lockOld = '';
+                    this.showLockDisable = true;
+                  }
+                })
+            }
+            .width('100%')
+
+            // 开启流程：两次输入4位密码
+            if (this.showLockSetup) {
+              TextInput({ text: this.lockPwd, placeholder: '设置4位数字密码' })
+                .type(InputType.Number)
+                .maxLength(4)
+                .height(42)
+                .fontSize(14)
+                .backgroundColor($r('app.color.cm_bg'))
+                .onChange((v: string) => {
+                  this.lockPwd = v;
+                })
+              TextInput({ text: this.lockPwd2, placeholder: '再次输入确认' })
+                .type(InputType.Number)
+                .maxLength(4)
+                .height(42)
+                .fontSize(14)
+                .backgroundColor($r('app.color.cm_bg'))
+                .onChange((v: string) => {
+                  this.lockPwd2 = v;
+                })
+              Row({ space: 10 }) {
+                Button('取消')
+                  .layoutWeight(1)
+                  .height(38)
+                  .fontSize(13)
+                  .backgroundColor($r('app.color.cm_divider'))
+                  .fontColor($r('app.color.cm_text'))
+                  .onClick(() => {
+                    this.showLockSetup = false;
+                  })
+                Button(this.lockBusy ? '设置中...' : '确认开启')
+                  .layoutWeight(1)
+                  .height(38)
+                  .fontSize(13)
+                  .backgroundColor(this.theme)
+                  .fontColor('#FFFFFF')
+                  .onClick(async (): Promise<void> => {
+                    if (this.lockBusy) {
+                      return;
+                    }
+                    if (!/^\d{4}$/.test(this.lockPwd)) {
+                      this.model.toast('密码必须是4位数字');
+                      return;
+                    }
+                    if (this.lockPwd !== this.lockPwd2) {
+                      this.model.toast('两次输入不一致');
+                      return;
+                    }
+                    this.lockBusy = true;
+                    const hash: string = await CryptoUtil.sha256Hex(this.lockPwd);
+                    PrefsService.getInstance().putStr(C.P_LOCK_HASH, hash);
+                    PrefsService.getInstance().putBool(C.P_LOCK_ON, true);
+                    this.lockOn = true;
+                    this.showLockSetup = false;
+                    this.lockBusy = false;
+                    this.model.toast('应用锁已开启');
+                  })
+              }
+              .width('100%')
+            }
+
+            // 关闭流程：校验当前密码
+            if (this.showLockDisable) {
+              TextInput({ text: this.lockOld, placeholder: '输入当前密码以关闭' })
+                .type(InputType.Number)
+                .maxLength(4)
+                .height(42)
+                .fontSize(14)
+                .backgroundColor($r('app.color.cm_bg'))
+                .onChange((v: string) => {
+                  this.lockOld = v;
+                })
+              Row({ space: 10 }) {
+                Button('取消')
+                  .layoutWeight(1)
+                  .height(38)
+                  .fontSize(13)
+                  .backgroundColor($r('app.color.cm_divider'))
+                  .fontColor($r('app.color.cm_text'))
+                  .onClick(() => {
+                    this.showLockDisable = false;
+                  })
+                Button(this.lockBusy ? '验证中...' : '确认关闭')
+                  .layoutWeight(1)
+                  .height(38)
+                  .fontSize(13)
+                  .backgroundColor($r('app.color.cm_accent'))
+                  .fontColor('#FFFFFF')
+                  .onClick(async (): Promise<void> => {
+                    if (this.lockBusy) {
+                      return;
+                    }
+                    this.lockBusy = true;
+                    const hash: string = await CryptoUtil.sha256Hex(this.lockOld);
+                    this.lockBusy = false;
+                    if (hash !== PrefsService.getInstance().getStr(C.P_LOCK_HASH, '')) {
+                      this.model.toast('密码错误');
+                      return;
+                    }
+                    PrefsService.getInstance().putBool(C.P_LOCK_ON, false);
+                    PrefsService.getInstance().putStr(C.P_LOCK_HASH, '');
+                    this.lockOn = false;
+                    this.showLockDisable = false;
+                    this.model.toast('应用锁已关闭');
+                  })
+              }
+              .width('100%')
+            }
           }
           .width('100%')
           .padding(14)

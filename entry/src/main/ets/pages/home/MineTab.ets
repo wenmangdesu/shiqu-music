@@ -189,6 +189,8 @@ export struct MineTab {
         .backgroundColor($r('app.color.cm_card'))
         .border({ width: 2, color: $r('app.color.cm_text') })
         .margin({ top: 8 })
+        .transition(TransitionEffect.OPACITY.animation({ duration: 320, curve: Curve.EaseOut })
+          .combine(TransitionEffect.translate({ y: 24 }).animation({ duration: 320, curve: Curve.EaseOut })))
         .onClick(() => {
           if (this.user) {
             this.model.pushPage('Profile');
@@ -222,6 +224,8 @@ export struct MineTab {
         .borderRadius(16)
         .backgroundColor($r('app.color.cm_card'))
         .border({ width: 2, color: $r('app.color.cm_text') })
+        .transition(TransitionEffect.OPACITY.animation({ duration: 320, curve: Curve.EaseOut, delay: 60 })
+          .combine(TransitionEffect.translate({ y: 24 }).animation({ duration: 320, curve: Curve.EaseOut, delay: 60 })))
 
         // 播放统计
         Row() {
@@ -249,6 +253,8 @@ export struct MineTab {
         .borderRadius(16)
         .backgroundColor($r('app.color.cm_card'))
         .border({ width: 2, color: $r('app.color.cm_text') })
+        .transition(TransitionEffect.OPACITY.animation({ duration: 320, curve: Curve.EaseOut, delay: 120 })
+          .combine(TransitionEffect.translate({ y: 24 }).animation({ duration: 320, curve: Curve.EaseOut, delay: 120 })))
 
         // 功能入口
         Column() {
@@ -269,6 +275,8 @@ export struct MineTab {
         .backgroundColor($r('app.color.cm_card'))
         .border({ width: 2, color: $r('app.color.cm_text') })
         .clip(true)
+        .transition(TransitionEffect.OPACITY.animation({ duration: 320, curve: Curve.EaseOut, delay: 180 })
+          .combine(TransitionEffect.translate({ y: 24 }).animation({ duration: 320, curve: Curve.EaseOut, delay: 180 })))
 
         // 本地热歌榜
         if (this.topSongs.length > 0) {
@@ -318,6 +326,8 @@ export struct MineTab {
           .borderRadius(16)
           .backgroundColor($r('app.color.cm_card'))
           .border({ width: 2, color: $r('app.color.cm_text') })
+          .transition(TransitionEffect.OPACITY.animation({ duration: 320, curve: Curve.EaseOut, delay: 240 })
+            .combine(TransitionEffect.translate({ y: 24 }).animation({ duration: 320, curve: Curve.EaseOut, delay: 240 })))
         }
 
         // 最近播放

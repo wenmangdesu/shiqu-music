@@ -1,6 +1,7 @@
 {
   "src": [
     "pages/SplashPage",
+    "pages/LockPage",
     "pages/Index"
   ]
 }

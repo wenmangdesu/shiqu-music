@@ -2,6 +2,7 @@
  * 登录/注册页（第一阶段Mock实现）
  * 本地校验后直接建立会话；接入真实后端时替换 UserService.login 内部实现即可
  */
+import { curves } from '@kit.ArkUI';
 import { UserService } from '../service/UserService';
 import { AppModel } from '../viewmodel/AppModel';
 import { C } from '../common/Constants';
@@ -12,8 +13,26 @@ export struct LoginPage {
   @State username: string = '';
   @State password: string = '';
   @State busy: boolean = false;
+  /** 入场动画 */
+  @State contentOpacity: number = 0;
+  @State contentTranslateY: number = 30;
+  /** 按压缩放反馈 */
+  @State loginPressed: boolean = false;
   private model: AppModel = AppModel.getInstance();
   private userSvc: UserService = UserService.getInstance();
+
+  aboutToAppear(): void {
+    // 入场动画：淡入 + 上移（springMotion 弹性曲线）
+    setTimeout(() => {
+      this.getUIContext().animateTo({
+        duration: 400,
+        curve: curves.springMotion(0.6, 0.8)
+      }, () => {
+        this.contentOpacity = 1;
+        this.contentTranslateY = 0;
+      });
+    }, 50);
+  }
 
   private doLogin(): void {
     if (this.busy) {
@@ -78,6 +97,15 @@ export struct LoginPage {
           .fontSize(15)
           .backgroundColor(this.theme)
           .fontColor('#FFFFFF')
+          .scale({ x: this.loginPressed ? 0.95 : 1, y: this.loginPressed ? 0.95 : 1 })
+          .animation({ duration: 150, curve: curves.springMotion(0.6, 0.8) })
+          .onTouch((event: TouchEvent) => {
+            if (event.type === TouchType.Down) {
+              this.loginPressed = true;
+            } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+              this.loginPressed = false;
+            }
+          })
           .onClick(() => {
             this.doLogin();
           })
@@ -97,6 +125,8 @@ export struct LoginPage {
       .padding({ left: 24, right: 24 })
       .backgroundColor($r('app.color.cm_bg'))
       .constraintSize({ maxWidth: 560 })
+      .opacity(this.contentOpacity)
+      .translate({ y: this.contentTranslateY })
     }
     .title('登录')
   }
